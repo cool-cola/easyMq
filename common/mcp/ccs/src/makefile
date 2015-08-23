@@ -3,7 +3,7 @@ INC = -I./ -I../../public/
 #gprof is -pg , usage: stop ccs , gprof ccs ./gmon.out  -fPIC Position-Independent Code
 # -D_MUTI_THREAD
 
-CC=g++ -g -Wall -O2 -fPIC -D_BUFFMNG_APPEND_SKIP
+CC=g++ -g -Wall -O0 -fPIC -D_BUFFMNG_APPEND_SKIP
 LIB = -ldl -lpthread 
 BIN = ccs 
 ##################################

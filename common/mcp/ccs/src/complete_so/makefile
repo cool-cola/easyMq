@@ -1,4 +1,4 @@
-CC=g++ -g -Wall -O2 -fPIC 
+CC=g++ -g -Wall -O0 -fPIC 
 LIB = -ldl -lpthread 
 
 SO = asn13_complete.so asn20_complete.so http_msg_complete.so totallen_complete.so memcached_complete.so
