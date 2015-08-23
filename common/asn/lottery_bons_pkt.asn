@@ -1,0 +1,154 @@
+LOTTERYBONSMESSAGE DEFINITIONS ::=
+BEGIN
+
+EasyMqMessage ::= SEQUENCE
+{
+	iVer		INTEGER,			--version
+	iBirthsec	INTEGER,
+	iBirthusec	INTEGER,			--
+	iReserved	INTEGER,			--
+	iSeq 		INTEGER,			--
+	sExtBlob	OCTET STRING,		--
+	body 		BODYPKTS			--
+}
+
+BODYPKTS ::= CHOICE
+{
+	--71101~72100--
+	[71101] ReqLBMasterHeartBeat,
+	[71102] RspLBMasterHeartBeat,
+	[71111] ReqSubscribe,
+	[71112] RespSubsribe,
+
+	--72101~75100--
+	[72101] ReqLBWorkerHeartBeat,
+	[72102] RspLBWorkerHeartBeat,
+	[72103] ReqLBWorkerQueryTask,
+	[72104] RspLBWorkerQueryTask,
+	[72105] ReqLBWorkerSetTask,
+	[72106] RspLBWorkerSetTask,
+	[72107] ReqLBWorkerStopTask,
+	[72108] RspLBWorkerStopTask
+}
+
+-- ###############################################################################
+-- 
+-- ###############################################################################
+LBNameValue ::= SEQUENCE
+{
+	name	OCTET STRING,
+	value	OCTET STRING
+}
+LBNameValueList ::= SEQUENCE OF LBNameValue
+LBStringList ::= SEQUENCE OF OCTET STRING
+
+TASK ::= SEQUENCE
+{
+	taskID			INTEGER,-- 
+	taskType		INTEGER,-- 
+	taskState		INTEGER,-- 
+	lotteryName		OCTET STRING,-- 
+	lotteryPlay		OCTET STRING,-- 
+	
+	iReserve1		INTEGER,
+	iReserve2		INTEGER,
+	strReserve1		OCTET STRING,
+	strReserve2		OCTET STRING,
+	reserve			LBNameValueList	
+}
+TASKList ::= SEQUENCE OF TASK
+
+-- ###############################################################################
+-- master
+-- ###############################################################################
+
+ReqLBMasterHeartBeat ::= SEQUENCE
+{
+	hbMod		INTEGER,
+	reserve		LBNameValueList
+}
+
+RspLBMasterHeartBeat ::= SEQUENCE
+{
+	retCode		INTEGER,
+	svrInfo		LBNameValueList
+}
+
+ReqSubscribe ::= SEQUENCE
+{
+	topic		OCTET STRING,
+	srvName		OCTET STRING,
+	reserve		LBNameValueList
+}
+
+RspLBMasterAddTask ::= SEQUENCE
+{
+	retCode		INTEGER,
+	reserve		LBNameValueList
+}
+
+ReqLBMasterDoTask ::= SEQUENCE
+{
+	tasks		TASKList,
+	reserve		LBNameValueList
+}
+
+RspLBMasterDoTask ::= SEQUENCE
+{
+	retCode		INTEGER,
+	reserve		LBNameValueList
+}
+
+-- ###############################################################################
+-- worker��Ϣ���� --
+-- ###############################################################################
+
+ReqLBWorkerHeartBeat ::= SEQUENCE
+{
+	hbMod		INTEGER,
+	reserve		LBNameValueList
+}
+
+RspLBWorkerHeartBeat ::= SEQUENCE
+{
+	retCode		INTEGER,
+	svrInfo		LBNameValueList
+}
+
+ReqLBWorkerQueryTask ::= SEQUENCE
+{
+	reserve		LBNameValueList
+}
+
+RspLBWorkerQueryTask ::= SEQUENCE
+{
+	retCode		INTEGER,
+	taskInfo	TASK,
+	reserve		LBNameValueList
+}
+
+ReqLBWorkerSetTask ::= SEQUENCE
+{
+	taskInfo	TASK,
+	reserve		LBNameValueList
+}
+
+RspLBWorkerSetTask ::= SEQUENCE
+{
+	retCode		INTEGER,
+	reserve		LBNameValueList
+}
+
+ReqLBWorkerStopTask ::= SEQUENCE
+{
+	taskInfo	TASK,
+	reserve		LBNameValueList
+}
+
+RspLBWorkerStopTask ::= SEQUENCE
+{
+	retCode		INTEGER,
+	reserve		LBNameValueList
+}
+
+END

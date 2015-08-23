@@ -1,0 +1,8 @@
+#!/bin/bash
+# author : scofield
+# date   : 2014/12/02
+
+PROC="pay_worker"
+
+ps -ef | grep ${PROC} | grep -v grep
+

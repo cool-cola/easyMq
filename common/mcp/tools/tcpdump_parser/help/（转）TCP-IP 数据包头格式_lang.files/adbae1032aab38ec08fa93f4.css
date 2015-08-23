@@ -1,0 +1,222 @@
+BODY {
+	BACKGROUND: url(http://imgsrc.baidu.com/css/pic/item/70cbee095ba6b0b32eddd4b5.jpg) #cccccc center top; CURSOR: url('http://www.ztwire.com/cert/318.ani'); COLOR: #000000; align: 
+}
+A {
+	CURSOR: url('http://www.ztwire.com/cert/271.ani')
+}
+A {
+	FONT-SIZE: 12px; COLOR: #000000; TEXT-DECORATION: none
+}
+A:link {
+	FONT-SIZE: 12px; COLOR: #000000; TEXT-DECORATION: none
+}
+A:visited {
+	FONT-SIZE: 12px; COLOR: #000000; TEXT-DECORATION: none
+}
+#header {
+	BACKGROUND: no-repeat center top; OVERFLOW: hidden; HEIGHT: 305px; idth: 1024px
+}
+#header DIV.lc {
+	BACKGROUND: url(http://imgsrc.baidu.com/css/pic/item/bacda10139afa4127bec2cb5.jpg) no-repeat center top; OVERFLOW: hidden; HEIGHT: 256px; idth: 1024px
+}
+#header DIV.rc {
+	BACKGROUND: url(http://imgsrc.baidu.com/css/pic/item/aafb31ec4f9c7f3b62d09fb5.jpg)
+}
+.stage {
+	PADDING-LEFT: 0px; BACKGROUND: url(http://imgsrc.baidu.com/css/pic/item/3137fb27a55feb1f918f9db5.jpg) repeat-y center center; MARGIN-BOTTOM: 110px; TEXT-ALIGN: center; idth: 1024px
+}
+#main {
+	BACKGROUND: url(http://imgsrc.baidu.com/css/pic/item/d9f46f035800bcf008fa93b5.jpg) no-repeat center bottom; MARGIN: 0px 0px -30px; WIDTH: 1024px! important
+}
+#layout {
+	LEFT: 110px; MARGIN: 0px auto; WIDTH: 820px; align: center; argin-left: 75
+}
+#layout TD.c2t1 {
+	
+}
+#layout TD.c2t2 {
+	
+}
+#layout TD.c2t3 {
+	PADDING-RIGHT: 10px; PADDING-LEFT: 0px
+}
+.stagepad {
+	LEFT: 110px; MARGIN: 0px auto; WIDTH: 820px; align: center; argin-left: 75
+}
+#header DIV.tit {
+	FONT-SIZE: 22px; FILTER: Shadow(Color=#63B9EA,Direction=315); LEFT: 120px; WIDTH: 300px; LINE-HEIGHT: 40px; FONT-FAMILY: ¡• È; TOP: 20px; TEXT-ALIGN: center; idth: 360px; ont-weight: bold; ackground: #ccc no-repeat center; ilter: Alpha(opacity=60,finishOpacity=0,style=0)
+}
+#header DIV.tit A.titlink {
+	FONT-SIZE: 40px; COLOR: #125a85; TEXT-DECORATION: none
+}
+#header DIV.tit A.titlink:visited {
+	FONT-SIZE: 40px; COLOR: #125a85; TEXT-DECORATION: none
+}
+#header DIV.desc {
+	FONT-SIZE: 15px; FILTER: glow(color:#ffffff,strength=3); LEFT: 450px; WIDTH: 350px; COLOR: #125a85; FONT-FAMILY: ÀŒÃÂ; TOP: 20px; TEXT-ALIGN: left; isplay: none
+}
+.line {
+	MARGIN-BOTTOM: 5px
+}
+#tabline {
+	DISPLAY: none
+}
+#tab {
+	LEFT: 842px; WIDTH: 90px! important; LINE-HEIGHT: 26px! important; LETTER-SPACING: 0px; TOP: 104px; WRITING-MODE: lr-tb; HEIGHT: 25px! important
+}
+#tab A.on {
+	FONT-SIZE: 1px; BACKGROUND: #fff no-repeat center 50%; FILTER: Alpha(opacity=70,finishOpacity=30,style=2); WIDTH: 90px! important; COLOR: #e5d98a; HEIGHT: 25px! important
+}
+#tab A.on:link {
+	FONT-SIZE: 1px; BACKGROUND: #fff no-repeat center 50%; FILTER: Alpha(opacity=70,finishOpacity=30,style=2); WIDTH: 90px! important; COLOR: #e5d98a; HEIGHT: 25px! important
+}
+#tab A.on:visited {
+	FONT-SIZE: 1px; BACKGROUND: #fff no-repeat center 50%; FILTER: Alpha(opacity=70,finishOpacity=30,style=2); WIDTH: 90px! important; COLOR: #e5d98a; HEIGHT: 25px! important
+}
+#tab A.on:hover {
+	FONT-SIZE: 1px; BACKGROUND: #fff no-repeat center 50%; FILTER: Alpha(opacity=70,finishOpacity=30,style=2); WIDTH: 90px! important; COLOR: #e5d98a; HEIGHT: 25px! important
+}
+#tab A:link {
+	FONT-WEIGHT: bold; FONT-SIZE: 1px; BACKGROUND: #ccc no-repeat center 50%; FILTER: Alpha(opacity=0,finishOpacity=0,style=0); WIDTH: 90px! important; COLOR: #e5d98a; HEIGHT: 25px! important; TEXT-ALIGN: center; TEXT-DECORATION: none
+}
+#tab A:visited {
+	FONT-WEIGHT: bold; FONT-SIZE: 1px; BACKGROUND: #ccc no-repeat center 50%; FILTER: Alpha(opacity=0,finishOpacity=0,style=0); WIDTH: 90px! important; COLOR: #e5d98a; HEIGHT: 25px! important; TEXT-ALIGN: center; TEXT-DECORATION: none
+}
+#tab A:hover {
+	FONT-SIZE: 1px; BACKGROUND: #fff no-repeat center 50%; FILTER: Alpha(opacity=70,finishOpacity=20,style=2); LEFT: 0px; WIDTH: 90px! important; COLOR: #e5d98a; POSITION: relative; TOP: 1px; HEIGHT: 25px! important; TEXT-DECORATION: none
+}
+#tab SPAN {
+	DISPLAY: none
+}
+#tab2 {
+	BACKGROUND: url(http://imgsrc.baidu.com/css/pic/item/3137fb27a55feb1f918f9db5.jpg) no-repeat center center; MARGIN-LEFT: 0px; OVERFLOW: hidden; WIDTH: auto
+}
+#tab2 A {
+	FONT-SIZE: 12px
+}
+#tab2 A:link {
+	COLOR: #000000
+}
+#tab2 A:visited {
+	COLOR: #000000
+}
+#tab2 SPAN {
+	FONT-WEIGHT: bold; FONT-SIZE: 12px; COLOR: #000000
+}
+#m_setting {
+	FONT-SIZE: 14px; MARGIN-LEFT: -10px
+}
+.mod {
+	MARGIN-BOTTOM: 5px; COLOR: #000000
+}
+.mod A:link {
+	COLOR: #181818
+}
+.mod A:visited {
+	COLOR: #181818
+}
+.line {
+	BORDER-TOP: #63b9ea 1px outset; MARGIN-TOP: 5px; LINE-HEIGHT: 5px
+}
+.modth {
+	BACKGROUND: url(http://imgsrc.baidu.com/css/pic/item/5c3508ef5056bbf3ce1b3eb5.jpg) no-repeat left 50%; BORDER-BOTTOM: #63b9ea 4px dotted; HEIGHT: 30px
+}
+.modhead {
+	PADDING-RIGHT: 5px; PADDING-LEFT: 5px; PADDING-BOTTOM: 5px; PADDING-TOP: 8px
+}
+.modtit {
+	FONT-WEIGHT: bold; FONT-SIZE: 14px; COLOR: #000000
+}
+A.modtit {
+	COLOR: #000000
+}
+A.modtit:link {
+	COLOR: #000000
+}
+A.modtit:visited {
+	COLOR: #000000
+}
+.modopt {
+	PADDING-RIGHT: 4px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; PADDING-TOP: 4px
+}
+.modbox {
+	PADDING-RIGHT: 10px; PADDING-LEFT: 10px; PADDING-BOTTOM: 5px; PADDING-TOP: 5px; BORDER-BOTTOM: #cc6600 0px dotted
+}
+.c2t1 .modtl {
+	BACKGROUND: no-repeat left 50%; WIDTH: 30px! important; HEIGHT: 30px
+}
+.c2t3 .modth {
+	BORDER-RIGHT: #63b9ea 1px solid; BORDER-TOP: #63b9ea 1px solid; BACKGROUND: url(http://imgsrc.baidu.com/css/pic/item/9b80de23de788c4e9822edb5.jpg) no-repeat left 50%; BORDER-LEFT: #63b9ea 1px solid; TEXT-INDENT: 8px; BORDER-BOTTOM: #63b9ea 1px solid; HEIGHT: 30px! important
+}
+.c2t3 .modtit {
+	FONT-WEIGHT: bold; FONT-SIZE: 12px; COLOR: #000000
+}
+.c2t3 .modbox {
+	BORDER-RIGHT: #63b9ea 1px dotted; BORDER-LEFT: #63b9ea 1px dotted; BORDER-BOTTOM: #63b9ea 1px dotted
+}
+#mod_bloglist .modth {
+	
+}
+#m_blog DIV.tit {
+	PADDING-RIGHT: 65px; PADDING-LEFT: 65px; FONT-WEIGHT: bold; FONT-SIZE: 14px; BACKGROUND: url(http://imgsrc.baidu.com/css/pic/item/6f0eb034db141f275bb5f5b5.jpg) no-repeat; PADDING-TOP: 5px; HEIGHT: 66px
+}
+#m_blog DIV.tit A {
+	FONT-WEIGHT: bold; FONT-SIZE: 14px; COLOR: #000000
+}
+#m_blog DIV.tit A:link {
+	COLOR: #000000
+}
+#m_blog DIV.tit A:visited {
+	COLOR: #000000
+}
+#m_blog DIV.date {
+	MARGIN: -20px 74px 15px; COLOR: #000000
+}
+#m_blog DIV.cnt {
+	FONT-SIZE: 12px; COLOR: #000000; LINE-HEIGHT: 25px
+}
+#m_blog DIV.more {
+	MARGIN: 5px 0px
+}
+#m_blog DIV.more A {
+	FONT-SIZE: 12px; COLOR: #181818
+}
+#m_blog DIV.more A:visited {
+	COLOR: #181818
+}
+#m_blog DIV.opt {
+	FONT-SIZE: 12px; MARGIN: 0px 0px 20px; COLOR: #181818
+}
+#m_blog DIV.opt A {
+	FONT-SIZE: 12px; COLOR: #181818
+}
+#m_blog DIV.opt A:visited {
+	FONT-SIZE: 12px; COLOR: #181818
+}
+#m_blog DIV.line {
+	BORDER-TOP: #63b9ea 1px outset; MARGIN-TOP: 1px; MARGIN-BOTTOM: 3px; LINE-HEIGHT: 1px
+}
+#m_pro {
+	DISPLAY: block; BACKGROUND: no-repeat 50% top; MARGIN: 0px auto; VERTICAL-ALIGN: middle; WIDTH: auto; PADDING-TOP: 15px; TEXT-ALIGN: center; eight: 166px
+}
+#m_pro DIV.wrapper IMG {
+	VERTICAL-ALIGN: middle; ALIGN: center
+}
+#m_pro DIV.portrait {
+	PADDING-LEFT: 24px; MARGIN: 0px auto; VERTICAL-ALIGN: middle; TEXT-ALIGN: center; ALIGN: center
+}
+#m_pro DIV.userinfo {
+	DISPLAY: block; FONT-SIZE: 14px; MARGIN: 0px auto; COLOR: #000000; PADDING-TOP: 15px; FONT-FAMILY: Georgia; TEXT-ALIGN: center; isplay: none
+}
+#m_pro DIV.line {
+	BORDER-TOP: #63b9ea 1px dotted
+}
+#mod_cals .modbox {
+	PADDING-RIGHT: 1px; PADDING-LEFT: 1px; BACKGROUND: #cccccc; PADDING-BOTTOM: 1px; PADDING-TOP: 1px
+}
+#cals {
+	BACKGROUND: url(http://imgsrc.baidu.com/css/pic/item/70cbee095ba6b0b32eddd4b5.jpg) #cccccc; FILTER: Alpha(Opacity=80, FinishOpacity=20, Style=0, StartX=5, StartY=5, FinishX=0, FinishY=0)
+}
+#phx {
+	FILTER: Alpha(Opacity=100, FinishOpacity=20, Style=3, StartX=5, StartY=5, FinishX=0, FinishY=0)gray(); COLOR: #b9f460
+}

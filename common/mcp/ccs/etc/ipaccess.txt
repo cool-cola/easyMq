@@ -1,0 +1,7 @@
+#ipaddr(* is ok)		ACCESS/DENY
+#192.168.1.*			ACCESS
+
+#1.2.3.4		ACCESS
+#1.2.3.*		DENY
+
+

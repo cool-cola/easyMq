@@ -1,0 +1,26 @@
+/asn-any.c/1.1/Mon Oct 16 09:05:00 2006//
+/asn-bits.c/1.1/Mon Oct 16 09:05:00 2006//
+/asn-bool.c/1.1/Mon Oct 16 09:05:00 2006//
+/asn-enum.c/1.1/Mon Oct 16 09:05:00 2006//
+/asn-int.c/1.1/Mon Oct 16 09:05:00 2006//
+/asn-len.c/1.1/Mon Oct 16 09:05:00 2006//
+/asn-list.c/1.1/Mon Oct 16 09:05:00 2006//
+/asn-null.c/1.1/Mon Oct 16 09:05:00 2006//
+/asn-octs.c/1.1/Mon Oct 16 09:05:00 2006//
+/asn-oid.c/1.1/Mon Oct 16 09:05:00 2006//
+/asn-real.c/1.1/Mon Oct 16 09:05:00 2006//
+/asn-tag.c/1.1/Mon Oct 16 09:05:00 2006//
+/exp-buf.c/1.1/Mon Oct 16 09:05:00 2006//
+/hash.c/1.1/Mon Oct 16 09:05:00 2006//
+/nibble-alloc.c/1.1/Mon Oct 16 09:05:00 2006//
+/print.c/1.1/Mon Oct 16 09:05:00 2006//
+/sbuf.c/1.1/Mon Oct 16 09:05:00 2006//
+/str-stk.c/1.1/Mon Oct 16 09:05:00 2006//
+/tbl-dbg.c/1.1/Mon Oct 16 09:05:00 2006//
+/tbl-dec.c/1.1/Mon Oct 16 09:05:00 2006//
+/tbl-enc.c/1.1/Mon Oct 16 09:05:00 2006//
+/tbl-free.c/1.1/Mon Oct 16 09:05:00 2006//
+/tbl-gen.c/1.1/Mon Oct 16 09:05:00 2006//
+/tbl-print.c/1.1/Mon Oct 16 09:05:00 2006//
+/tbl-util.c/1.1/Mon Oct 16 09:05:00 2006//
+D

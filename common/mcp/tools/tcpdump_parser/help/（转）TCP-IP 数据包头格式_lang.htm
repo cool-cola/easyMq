@@ -1,0 +1,970 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0073)http://hi.baidu.com/kuangxiangjie/blog/item/c39e27ada26d59014b36d691.html -->
+<!--STATUS OK--><HTML><HEAD><TITLE>（转）TCP/IP 数据包头格式_lang</TITLE>
+<META http-equiv=content-type content="text/html; charset=gb2312">
+<STYLE type=text/css>.error {
+	FONT-SIZE: 12px; COLOR: #ff0000
+}
+</STYLE>
+
+<SCRIPT src="（转）TCP-IP 数据包头格式_lang.files/global.js" 
+type=text/javascript></SCRIPT>
+
+<SCRIPT language=javascript src="（转）TCP-IP 数据包头格式_lang.files/popup.js"></SCRIPT>
+
+<SCRIPT src="（转）TCP-IP 数据包头格式_lang.files/BdEditor-mined.js" 
+type=text/javascript></SCRIPT>
+
+<SCRIPT language=JavaScript 
+src="（转）TCP-IP 数据包头格式_lang.files/g_spjs.js"></SCRIPT>
+
+<SCRIPT language=javascript>
+<!--
+
+var allkey="";
+var i=0;
+var flag=0;
+function setpv(allnum)
+{
+	var num = allnum.split('_');
+	document.getElementById("result").innerHTML=num[0];
+}
+
+function checkMail(s)
+{
+  	var pattern=/\w+@\w+\.[a-z]+/;
+  	if(pattern.test(s))
+    {
+       return true;
+    }
+  	else
+   {
+      return false;
+   }
+}
+
+
+function checkeandu(eanduid)
+{
+	var eanduvalue=G(eanduid).value;
+	var len=bytes(eanduvalue);
+	if(len>128)
+	{
+		showErr(2,"您输入的网址或邮箱太长，请保持在128字节以内。");
+		return false;
+	}
+	else
+	{
+		 return true;
+	}
+
+}
+
+function cmtdel(str)
+{
+	var pop=new Popup({ contentType:3,isReloadOnClose:false,width:340,height:80});
+	pop.setContent("title","删除评论");
+	pop.setContent("confirmCon","您确定要彻底删除这条评论吗？");
+	pop.setContent("callBack",delCallback2);
+	pop.setContent("parameter",{fid:str,popup:pop});
+	pop.build();
+	pop.show();
+	return false;
+}
+function delCallback2(para)
+{
+	var o_pop=para["popup"];
+	o_pop.config.contentType=1;
+	o_pop.setContent("contentUrl","");
+	o_pop.reBuild();
+	G(para["fid"]).target=o_pop.iframeIdName;
+	eval("document."+para["fid"]).submit();
+}
+
+String.prototype.byteLength = function() {
+    return this.replace(/[^\u0000-\u007f]/g,"\u0061\u0061").length;
+}
+
+function checkname(strid)
+{
+	var ele=document.getElementById(strid);
+	var len=bytes(ele.value);
+	if(len>49)
+	{
+		showErr(1,"您输入的姓名太长，请保持在49字节以内。");
+		return false;
+	}
+	else
+	{
+		if(len==0)
+		{
+			document.getElementById(strid).value="匿名网友";
+		}
+		 return true;
+	}
+
+}
+
+function checktext(textid)
+{
+        var tempStr='';
+        var isLightFont=false;
+		if(editor&&textid=="spBlogCmtText"){
+			//document.getElementById("spBlogCmtText").value=editor.getHtml();
+			tempStr=editor.getHtml();
+			tempStr=tempStr.replace(/<span style="filter:glow\(color=#([0-9a-z]{3,6}),strength=2\);height:0px;color:#([0-9a-z]{3,6})">/ig,'');
+			tempStr=tempStr.replace(/<\/span>/ig,'');
+			document.getElementById("spBlogCmtText").value=tempStr;
+            isLightFont=!(tempStr==editor.getHtml());
+        }
+		document.getElementById(textid).value=trimlr(textid);
+		var str=trimrn(textid);
+		len=str.length;
+		if(len==0 || ((/^[\s,　]+$/gi).test(str)) )
+		{
+			showErr(3,"您必须输入评论内容，请检查。");
+			return false;
+		}
+		else
+        {
+                len=str.byteLength();
+                var maxLength=isLightFont?916:1000;
+				if(len > maxLength)
+				{
+					showErr(3,"您输入的评论内容太长，请保持在500字以内。");
+					return false;
+				}
+				if(editor&&textid=="spBlogCmtText"){
+					document.getElementById("spBlogCmtText").value=editor.getHtml();
+					document.getElementById(textid).value=trimlr(textid);
+				}
+
+			return true;
+		}
+}
+
+function showErr(index,str)
+{
+	G(index+"_err").style.display="";
+	G(index+"_err_con").innerHTML=str;
+}
+function hidErr(index)
+{
+	G(index+"_err").style.display="none";
+	G(index+"_err_con").innerHTML="";
+}
+
+function alertPop(tit,con)
+{
+	var pop=new Popup({ contentType:4,isReloadOnClose:false,width:340,height:80});
+	pop.setContent("title",tit);
+	pop.setContent("alertCon",con);
+	pop.build();
+	pop.show();
+}
+
+function cmtfull()
+{
+	var cnum=0;
+	if(cnum>=50000)
+	{
+		alertPop("发表评论","单篇日志评论数最多为50000条.");
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
+function checkcmtform()
+{
+	if(checkname("spBlogCmtor")&&checkeandu("spBlogCmtURL")&&checktext("spBlogCmtText")&&cmtfull())
+	{
+		submitForm();
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+var g_pop=null;
+function submitForm()
+{
+	g_pop=new Popup({ contentType:1,isReloadOnClose:false,width:340,height:80});
+	g_pop.setContent("title","添加评论");
+	g_pop.setContent("contentUrl","");
+	g_pop.setContent("someDisabledBtn","btn_ok");
+	g_pop.build();
+	G("popFormSubmit").target=g_pop.iframeIdName;
+	g_pop.show();
+}
+
+function g_close_pop()
+{
+	g_pop.close();
+}
+
+function formatonlinpic()
+{
+var picobj=document.getElementsByName("onlinepic");
+var picnum=picobj.length;
+
+	for(var i=0;i<picnum;i++)
+	{
+		if(picobj[i].width>200)
+		{
+			picobj[i].width=200;
+		}
+		if(picobj[i].height>200)
+		{
+			picobj[i].height=200;
+		}
+	}
+    try{document.getElementById("btn_ok").disabled = "";}catch(e){}
+}
+
+function addToFavor(){
+var blogTitle='（转）TCP/IP 数据包头格式'.replace(/&#39;/g,'\'');
+window.open('http://cang.baidu.com/do/add?it='+encodeURIComponent(blogTitle+'_百度空间')+'&iu='+encodeURIComponent(location.href)+'&fr=sp#nw=1','_s','scrollbars=no,width=600,height=450,right=75,top=20,status=no,resizable=yes');
+return false;
+}
+
+var isIE = /*@cc_on!@*/false;
+function tracker(did,a){
+	return function(){
+		var t=new Date().getTime();
+		var href=a.href;
+        if(isIE){
+            var r = /href\s*=\s*("|')?([^\s]*)\1/gi;
+            if(r.test(a.outerHTML))
+                href = RegExp.$2;
+        }
+        new Image().src = "http://hi.baidu.com/sys/statlog/1.gif?m=" + did + "&v=" + encodeURIComponent(href) + "&c=" + encodeURIComponent(location.href) + "&t="+t;
+	}
+}
+
+function tracker_init(did){
+	var _s=document.getElementById(did);
+	var as = _s.getElementsByTagName('A');
+	for(var i = 0, j = as.length; i < j; i ++){
+		var a = as[i];
+		if(isIE){
+			a.attachEvent("onclick", tracker(did,a));
+		}else{
+			a.addEventListener("click", tracker(did,a), false);
+		}
+	}
+}
+
+
+/* some functions for cmt-reply */
+		function cmtreply(cmtName,cmtPorID)
+		{
+			window.location.hash="#send";
+			var cmtForm=document.form1;
+			cmtForm.cm.value="3";
+			if(!cmtForm.spReferTarget)
+			{
+				var ipt=document.createElement("input");
+				ipt.type="hidden";
+				ipt.name="spReferTarget";
+				ipt.value=cmtPorID;
+				cmtForm.appendChild(ipt);
+			}else cmtForm.spReferTarget.value=cmtPorID;
+
+
+			 //G("reTitle").innerHTML="回复"+cmtName+"：";
+			 G("cancleReLink").style.display="";
+			 cmtForm.btn_ok.value="回复评论";
+
+
+			 try{
+				editor.window.focus();
+                editor.window.document.body.innerHTML="回复"+cmtName+"：";
+
+                var w = editor.window;
+				if(w.getSelection){
+					var d = w.document;
+					var s = w.getSelection();
+					var r = d.createRange();
+					r.setStartAfter(d.body.firstChild);
+					r.setEndAfter(d.body.lastChild);
+					s.removeAllRanges();
+					s.addRange(r);
+				}
+			}catch(e){
+			 		try{
+				 		cmtForm.getElementsByTagName("textarea")[0].focus();
+				 		cmtForm.getElementsByTagName("textarea")[0].value="回复"+cmtName+"：";
+				 	}catch(e){}
+			}
+		}
+
+		function canclereply()
+		{
+			var cmtForm=document.form1;
+			cmtForm.cm.value="1";
+			try{cmtForm.removeChild(cmtForm.spReferTarget);}catch(e){}
+			/*
+			try{
+					var cmt=cmtForm.getElementsByTagName("textarea")[0]
+					cmt.value="";
+					cmt.focus();
+			}catch(e){}
+			*/
+
+			try{
+					var ed=editor.window.document.body;
+					ed.innerHTML="";
+					editor.window.focus();
+				}catch(e){
+					var cmt=cmtForm.getElementsByTagName("textarea")[0];
+					cmt.value="";
+					cmt.focus();
+			}
+
+			G("cancleReLink").style.display="none";
+			cmtForm.btn_ok.value="发表评论";
+		}
+
+		function gotoreply()
+		{//to checking whether reply cmt
+			if( window.location.hash.indexOf("&re=1")<0) return;
+			var cmtID=window.location.hash.split("&")[0].replace("#","");
+			var cmtlinks=document.getElementsByTagName("a");
+			for(var i=0,n=cmtlinks.length;i<n;i++)
+			{
+				if(cmtlinks[i].name==cmtID){ var rename=cmtlinks[i].getAttribute("rename");  repid=cmtlinks[i].getAttribute("repid"); break;}
+			}
+			if(typeof(rename)!="undefined"){
+				cmtreply(rename, repid);
+			}
+		}
+
+//-->
+</SCRIPT>
+
+<SCRIPT type=text/javascript>
+    /*<![CDATA[*/
+
+window.onerror=function(){return true;}
+
+var RelatedDocData = null, GetAndEval = false;
+(function(){
+	var xhr = BdAjax.getXHR();
+	if(xhr == null){
+		RelatedDocData = -1;
+		return;
+	}
+
+	xhr.open("GET", "/sys/search?type=8&word=%A3%A8%D7%AA%A3%A9TCP%2FIP%20%CA%FD%BE%DD%B0%FC%CD%B7%B8%F1%CA%BD&item=c39e27ada26d59014b36d691&t=" + new Date().getTime(), true);
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState == 4){
+			if(xhr.status == 0 || xhr.status == 200){
+				if(GetAndEval){
+					eval(xhr.responseText);
+				}else{
+					RelatedDocData = xhr.responseText;
+				}
+			}
+		}
+	}
+	xhr.send(null);
+})();
+/*]]>*/
+</SCRIPT>
+
+<META content="MSHTML 6.00.2900.3492" name=GENERATOR></HEAD>
+<BODY onload=formatonlinpic();>
+<CENTER>
+<SCRIPT type=text/javascript>
+/*<![CDATA[*/
+if(top.location != self.location){
+	top.location = self.location;
+}
+var myref = encodeURIComponent("http://hi.baidu.com/kuangxiangjie/blog/item/c39e27ada26d59014b36d691%2Ehtml");
+/*]]>*/
+</SCRIPT>
+<LINK href="（转）TCP-IP 数据包头格式_lang.files/mods.css" type=text/css 
+rel=stylesheet><LINK 
+href="（转）TCP-IP 数据包头格式_lang.files/adbae1032aab38ec08fa93f4.css" type=text/css 
+rel=stylesheet><LINK href="（转）TCP-IP 数据包头格式_lang.files/space.css" type=text/css 
+rel=stylesheet>
+<STYLE type=text/css>#usrbar {
+	PADDING-RIGHT: 10px; PADDING-LEFT: 0px; FONT-SIZE: 12px; BACKGROUND: #ffffff; FILTER: alpha(opacity=65); PADDING-BOTTOM: 3px; WIDTH: 100%; COLOR: #000000; LINE-HEIGHT: 19px; PADDING-TOP: 4px; FONT-FAMILY: Arial; LETTER-SPACING: normal; HEIGHT: 19px; TEXT-ALIGN: right; moz-opacity: 0.5
+}
+#usrbar A {
+	COLOR: #0000cc; TEXT-DECORATION: underline
+}
+#usrbar A:link {
+	COLOR: #0000cc; TEXT-DECORATION: underline
+}
+#usrbar A:visited {
+	COLOR: #0000cc; TEXT-DECORATION: underline
+}
+#ft {
+	CLEAR: both; FONT-SIZE: 12px; COLOR: #666666; LINE-HEIGHT: 20px; FONT-FAMILY: Arial; HEIGHT: 20px; TEXT-ALIGN: center
+}
+#ft A {
+	COLOR: #7777cc; TEXT-DECORATION: underline
+}
+#ft A:link {
+	COLOR: #7777cc; TEXT-DECORATION: underline
+}
+#ft A:visited {
+	COLOR: #7777cc; TEXT-DECORATION: underline
+}
+#usrbar {
+	LETTER-SPACING: normal
+}
+#usrbar A {
+	LETTER-SPACING: normal
+}
+#usrbar A:link {
+	LETTER-SPACING: normal
+}
+#usrbar A:visited {
+	LETTER-SPACING: normal
+}
+#ft {
+	LETTER-SPACING: normal
+}
+#ft A {
+	LETTER-SPACING: normal
+}
+#ft A:link {
+	LETTER-SPACING: normal
+}
+#ft A:visited {
+	LETTER-SPACING: normal
+}
+</STYLE>
+
+<DIV id=usrbar><NOBR><A id=hi_index href="http://hi.baidu.com/" 
+target=_blank>百度空间</A>&nbsp;|&nbsp;<A href="http://www.baidu.com/" 
+target=_blank>百度首页</A>&nbsp;
+<SCRIPT type=text/javascript>
+		document.write('| <a href="https://passport.baidu.com/?login&tpl=sp&tpl_reg=sp&u=http://hi.baidu.com' + encodeURIComponent('/kuangxiangjie/blog/item/c39e27ada26d59014b36d691%2Ehtml') + '">登录</a>');
+		</SCRIPT>
+ </NOBR></DIV>
+<DIV id=newUserTip 
+style="Z-INDEX: 30000; RIGHT: 0px; FLOAT: right; WIDTH: 225px; POSITION: absolute; TOP: 26px; HEIGHT: 130px; TEXT-ALIGN: right"><A 
+id=newUserTipShadow 
+style="DISPLAY: block; FONT-SIZE: 14px; Z-INDEX: 30001; RIGHT: 14px; BACKGROUND: none transparent scroll repeat 0% 0%; OVERFLOW: hidden; WIDTH: 55px; COLOR: #4242f9! important; POSITION: absolute; TOP: 108px; HEIGHT: 14px; TEXT-DECORATION: none! important" 
+onclick=newUserRegLog() 
+href="http://passport.baidu.com/?reg&amp;tpl=sp&amp;return_method=get&amp;skip_ok=1&amp;u=http://hi.baidu.com/sys/reg/" 
+target=_blank>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</A> 
+<EMBED id=newUserTipSwf style="WIDTH: 225px; HEIGHT: 130px" 
+src=http://hi.baidu.com/ui/flash/userReg/guide.swf 
+type=application/x-shockwave-flash wmode="transparent" 
+allowScriptAcess="always"> </DIV>
+<SCRIPT language=javascript>
+	<!--
+		function newUserTipShow(f)
+		{
+			if(f=="0"){//close
+				G("newUserTipSwf").style.width="40px";
+				G("newUserTip").style.width="40px";
+				G("newUserTipShadow").style.display="none";
+			}else{//show
+				G("newUserTip").style.width="225px";
+				G("newUserTipSwf").style.width="225px";
+				G("newUserTipShadow").style.display="block";
+
+			}
+		}
+
+		function newUserRegLog(){
+			var now=new Date();
+			now.setTime(now.getTime()+5*60*1000);
+			document.cookie="BDSP_REGFLAG=1;expires="+now.toGMTString()+";path=/";
+			new Image().src="http://hi.baidu.com/sys/statlog/1.gif?m=blog_newer_pro2_click&v=/kuangxiangjie&t="+Math.random();
+		}
+	//-->
+	</SCRIPT>
+
+<SCRIPT type=text/javascript>
+
+function set_cookie_4_bdtip(index/* start from one */, value){
+	var bdtip = document.cookie.match(/(^| )BDTIP=([^;]*)(;|$)/);
+	if(!bdtip){
+		bdtip=new Array(index);
+		for(var i=0,n=bdtip.length;i<n;i++)
+		{
+			if(bdtip[i]=="" || bdtip[i]==null)  bdtip[i]=0;
+			if(i == index - 1){
+				bdtip[i] = value;
+			}
+		}
+	}else{
+	bdtip = bdtip[2].split('-');
+	if(index > bdtip.length)  bdtip.length= index;
+	for(var i = 0, j = bdtip.length; i < j; i ++){
+		if(bdtip[i]=="" || bdtip[i]==null) bdtip[i]=0;
+		if(i == index - 1){
+			bdtip[i] = value;
+		}
+	}
+	}
+	bdtip = bdtip.join('-');
+	document.cookie = "BDTIP=" + bdtip+ ";expires=Wed, 28-Nov-37 01:45:46 GMT;path=/;domain=.baidu.com";
+}
+</SCRIPT>
+
+<DIV id=main align=left><!--[if IE]>
+<SCRIPT>
+var objmain = document.getElementById("main");
+function updatesize(){ var bodyw = window.document.body.offsetWidth; if(bodyw <= 790) objmain.style.width="772px"; else if(bodyw >= 1016) objmain.style.width="996px"; else objmain.style.width="100%"; }
+updatesize(); window.onresize = updatesize;
+</SCRIPT>
+<![endif]-->
+<DIV id=header>
+<DIV class=lc>
+<DIV class=rc></DIV></DIV>
+<DIV class=tit><A class=titlink 
+title="kuangxiangjie的空间 http://hi.baidu.com/kuangxiangjie" 
+href="http://hi.baidu.com/kuangxiangjie">lang</A></DIV>
+<DIV class=desc>lang</DIV>
+<DIV id=tabline></DIV>
+<DIV id=tab><A href="http://hi.baidu.com/kuangxiangjie">主页</A><A class=on 
+href="http://hi.baidu.com/kuangxiangjie/blog">博客</A><A 
+href="http://hi.baidu.com/kuangxiangjie/album">相册</A><SPAN>|</SPAN><A 
+href="http://hi.baidu.com/kuangxiangjie/profile">个人档案</A> <SPAN>|</SPAN><A 
+href="http://hi.baidu.com/kuangxiangjie/friends">好友</A> </DIV></DIV>
+<DIV class=stage>
+<DIV class=stagepad>
+<DIV style="WIDTH: 100%">
+<TABLE class=modth cellSpacing=0 cellPadding=0 width="100%" border=0>
+  <TBODY>
+  <TR>
+    <TD class=modtl width=7>&nbsp;</TD>
+    <TD class=modtc noWrap>
+      <DIV class=modhead><SPAN class=modtit>查看文章</SPAN></DIV></TD>
+    <TD class=modtc noWrap align=right></TD>
+    <TD class=modtr width=7>&nbsp;</TD></TR></TBODY></TABLE>
+<DIV class=modbox id=m_blog>
+<DIV class=tit>（转）TCP/IP 数据包头格式</DIV>
+<DIV class=date>2009年03月19日 星期四 23:54</DIV>
+<TABLE style="TABLE-LAYOUT: fixed">
+  <TBODY>
+  <TR>
+    <TD>
+      <DIV class=cnt id=blog_text>
+      <P><A 
+      href="http://www.cnblogs.com/jiangnii/archive/2007/05/15/747013.html">http://www.cnblogs.com/jiangnii/archive/2007/05/15/747013.html</A></P>
+      <P>&nbsp;&nbsp; 最近狂补基础，猛看TCP/IP协议。不过，书上的东西太抽象了，没有什么数据实例，看了不 
+      久就忘了。于是，搬来一个sniffer，抓了数据包来看，呵呵，结合书里面得讲解，理解得 比较快。我就来灌点基础知识。　</P>
+      <P>　　<STRONG>开始吧，先介绍IP协议。　 </STRONG></P>
+      <P>　　IP协议（Internet 
+      Protocol）是网络层协议，用在因特网上，TCP，UDP，ICMP，IGMP数据都是按照IP数据格式发送得。IP协议提供的是不可靠无连接得服务。IP数据包由一个头部和一个正文部分构成。正文主要是传输的数据，我们主要来理解头部数据，可以从其理解到IP协议。　</P>
+      <P>　　<STRONG>IP数据包头部格式（RFC791）</STRONG></P>
+      <P align=center><IMG 
+      style="BORDER-RIGHT: black 1px solid; BORDER-TOP: black 1px solid; BORDER-LEFT: black 1px solid; BORDER-BOTTOM: black 1px solid" 
+      src="（转）TCP-IP 数据包头格式_lang.files/1013357.jpg"></P>
+      <P>　　<STRONG>Example Internet Datagram Header</STRONG>　</P>
+      <P>　　上面的就是IP数据的头部格式，这里大概地介绍一下。　</P>
+      <P>　　IP头部由20字节的固定长度和一个可选任意长度部分构成，以大段点机次序传送，从左到 右。　</P>
+      <P>　　<STRONG>TCP协议</STRONG>　</P>
+      <P>　　TCP协议（TRANSMISSION CONTROL 
+      PROTOCOL）是传输层协议，为应用层提供服务，和UDP不同的是，TCP协议提供的可靠的面向连接的服务。在RFC793中是基本的TCP描述。关于TCP协议的头部格式内容的说明：　</P>
+      <P>　　<STRONG>TCP Header FORMat　</STRONG></P>
+      <P>　</P>
+      <P align=center><IMG 
+      style="BORDER-RIGHT: black 1px solid; BORDER-TOP: black 1px solid; BORDER-LEFT: black 1px solid; BORDER-BOTTOM: black 1px solid" 
+      src="（转）TCP-IP 数据包头格式_lang.files/1013359.jpg"></P>
+      <P>　　<STRONG>TCP Header FORMat　 </STRONG></P>
+      <P>　　跟IP头部差不多，基本的长度也是20字节。TCP数据包是包含在一个IP数据报文中的。　</P>
+      <P>　　好了，简单介绍到此为止。来看看我捕获的例子吧。这是一次FTP的连接，呵呵，是cuteftp默认的cuteftp的FTP站点，IP地址是：216.3.226.21。我的IP地址假设为:192.168.1.1。下面的数据就是TCO/IP连接过程中的数据传输。我们可以分析TCP 
+      /IP协议数据格式以及TCP/IP连接的三次握手（ThreeWay-Handshake）情况。下面的这些十六进制数据只是TCP/IP协议的数据，不是完整的网络通讯数据。　</P>
+      <P>　　第一次，我向FTP站点发送连接请求（我把TCP数据的可选部分去掉了）　</P>
+      <P>　　192.168.1.1-&gt;216.3.226.21　 <BR><BR>　　IP头部： 45 00 00 30 52 52 40 00 
+      80 06 2c 23 c0 a8 01 01 d8 03 e2 15　 <BR><BR>　　TCP头部：0d 28 00 15 50 5f a9 
+      06 00 00 00 00 70 02 40 00 c0 29 00 00　</P>
+      <P>　　来看看IP头部的数据是些什么。　</P>
+      <P>　　第一字节，“45”，其中“4”是IP协议的版本（Version），说明是IP4。“5”是IHL位，表示IP头部的长度，是一个4bit字段，最大就是1111了，值为12，IP头部的最大长度就是60字节。而这里为“5”，说明是20字节，这是标准的IP头部长度，头部报文中没有发送可选部分数据。　</P>
+      <P>　　接下来的一个字节“00”是服务类型（Type of Service）。这个8bit字段由3bit的优先权子字段（现在已经被忽略），4 
+      bit的TOS子字段以及1 bit的未用字段（现在为0）构成.4 
+      bit的TOS子字段包含：最小延时、最大吞吐量、最高可靠性以及最小费用构成，这四个1bit位最多只能有一个为1，本例中都为0，表示是一般服务。　</P>
+      <P>　　接着的两个字节“00 
+      30”是IP数据报文总长，包含头部以及数据，这里表示48字节。这48字节由20字节的IP头部以及28字节的TCP头构成（本来截取的TCP头应该是 
+      28字节的，其中8字节为可选部分，被我省去了）。因此目前最大的IP数据包长度是65535字节。　</P>
+      <P>　　再是两个字节的标志位（Identification）：“5252”，转换为十进制就是21074。这个是让目的主机来判断新来的分段属于哪个分组。　</P>
+      <P>　　下一个字节“40”，转换为二进制就是“0100 
+      0000”，其中第一位是IP协议目前没有用上的，为0。接着的是两个标志DF和MF。DF为1表示不要分段，MF为1表示还有进一步的分段（本例为 
+      0）。然后的“0 0000”是分段便移（Fragment Offset）。　</P>
+      <P>　　“80”这个字节就是TTL（Time To 
+      Live）了，表示一个IP数据流的生命周期，用Ping显示的结果，能得到TTL的值，很多文章就说通过TTL位来判别主机类型。因为一般主机都有默认的TTL值，不同系统的默认值不一样。比如WINDOWS为128。不过，一般Ping得到的都不是默认值，这是因为每次IP数据包经过一个路由器的时候 
+      TTL就减一，当减到0时，这个数据包就消亡了。这也时Tracert的原理。本例中为“80”，转换为十进制就是128了，我用的WIN2000。　</P>
+      <P>　　继续下来的是“06”，这个字节表示传输层的协议类型（Protocol）。在RFC790中有定义，6表示传输层是TCP协议。　</P>
+      <P>　　“2c 23”这个16bit是头校验和（Header Checksum）。　</P>
+      <P>　　接下来“c0 a8 01 01”，这个就是源地址（Source Address）了，也就是我的IP地址。</P>
+      <P>　　转换为十进制的IP地址就是：192.168.1.1，同样，继续下来的32位“d8 03 e2 
+      15”是目标地址，216.3.226.21　</P>
+      <P>　　好了，真累啊，终于看完基本的20字节的IP数据报头了。继续看TCP的头部吧，这个是作为IP数据包的数据部分传输的。　</P>
+      <P>　　TCP头部：0d 28 00 15 50 5f a9 06 00 00 00 00 70 02 40 00 c0 29 00 
+00　</P>
+      <P>　　一来就是一个两字节段“0d 28”，表示本地端口号，转换为十进制就是3368。第二个两字节段“00 
+      15”表示目标端口，因为我是连接FTP站点，所以，这个就是21啦，十六进制当然就是“00 15”。　</P>
+      <P>　　接下来的四个字节“50 5f a9 06”是顺序号（Sequence 
+      Number），简写为SEQ，SEQ=1348446470下面的四个字节“00 00 00 00”是确认号（Acknowledgment 
+      Number），简写为ACKNUM。　</P>
+      <P>　　继续两个字节，“70 02”，转换为二进制吧，“0111 0000 0000 
+      0010”。这两个字节,总共16bit，有好多东西呢。第一个4bit“0111”，是TCP头长，十进制为7，表示28个字节（刚才说了，我省略了8 
+      字节的option数据，所以你只看见了20字节）。接着的6bit现在TCP协议没有用上，都为0。最后的6bit“00 
+      0010”是六个重要的标志。这是两个计算机数据交流的信息标志。接收和发送断根据这些标志来确定信息流的种类。下面是一些介绍：　</P>
+      <P>　　URG：（Urgent Pointer field 
+      significant）紧急指针。用到的时候值为1，用来处理避免TCP数据流中断　</P>
+      <P>　　ACK：（Acknowledgment 
+      fieldsignificant）置1时表示确认号（AcknowledgmentNumber）为合法，为0的时候表示数据段不包含确认信息，确认号被忽略。　</P>
+      <P>　　PSH：（Push 
+      Function），PUSH标志的数据，置1时请求的数据段在接收方得到后就可直接送到应用程序，而不必等到缓冲区满时才传送。　</P>
+      <P>　　RST：（Reset the 
+      connection）用于复位因某种原因引起出现的错误连接，也用来拒绝非法数据和请求。如果接收到RST位时候，通常发生了某些错误。　</P>
+      <P>　　SYN：（Synchronize sequence 
+      numbers）用来建立连接，在连接请求中，SYN=1，ACK=0，连接响应时，SYN=1，ACK=1。即，SYN和ACK来区分 
+      Connection Request和Connection Accepted。　</P>
+      <P>　　FIN：（No more data from sender）用来释放连接，表明发送方已经没有数据发送了。　</P>
+      <P>　　这6个标志位，你们自己对号入座吧。本例中SYN=1，ACK=0，当然就是表示连接请求了。我们可以注意下面两个过程的这两位的变换。　</P>
+      <P>　　后面的“40 00 c0 29 00 
+      00”不讲了，呵呵，偷懒了。后面两次通讯的数据，自己分开看吧。我们看看连接的过程，一些重要地方的变化。　</P>
+      <P>　　第二次，FTP站点返回一个可以连接的信号。　</P>
+      <P>　　216.3.226.21-&gt;192.168.1.1　</P>
+      <P>　　IP头部： 45 00 00 2c c6 be 40 00 6a 06 cd ba d8 03 e2 15 c0 a8 01 01　 
+      <BR><BR>　　TCP头部：00 15 0d 28 4b 4f 45 c1 50 5f a9 07 60 12 20 58 64 07 00 
+      00　</P>
+      <P>　　第三次，我确认连接。TCP连接建立起来。　</P>
+      <P>　　192.168.1.1-&gt;216.3.226.21　 <BR><BR>　　IP头部： 45 00 00 28 52 53 40 00 
+      80 06 2c 2a c0 a8 01 01 d8 03 e2 15　 <BR><BR>　　TCP头部：0d 28 00 15 50 5f a9 
+      07 4b 4f 45 c2 50 10 40 b0 5b 1c 00 00　</P>
+      <P>　　好，我们看看整个Threeway_handshake过程。　 <BR><BR>　　第一步，我发出连接请求，TCP数据为：SEQ=50 5f 
+      a9 06，ACKNUM=00 00 00 00，SYN=1，ACK=0。　</P>
+      <P>　　第二步，对方确认可以连接，TCP数据为：SEQ=4b 4f 45 c1，ACKNUM=50 5f a9 
+      07，SYN=1，ACK=1。　</P>
+      <P>　　第三步，我确认建立连接。SEQ=50 5f a9 07， ACKNUM=4b 4f45c2，SYN=0，ACK=1。　</P>
+      <P>　　可以看出什么变化么？正式建立连接了呢，这些东西是什么值？　</P>
+      <P>　　我接收从216.3.226.21-&gt;192.168.1.1的下一个数据包中：　</P>
+      <P>　　SEQ=4b 4f 45 c2，ACKNUM=50 5f a9 
+      07,SYN=0,ACK=1这些都是很基础的东西，对于编写sniffer这样的东西是必须非常熟悉的。这里只讲解了TCP/IP协议的一点点东西，主要是头部数据的格式。(T002)</P></DIV></TD></TR></TBODY></TABLE><BR>
+<DIV class=opt><A title=查看该分类中所有文章 
+href="http://hi.baidu.com/kuangxiangjie/blog/category/&Iacute;&oslash;&Acirc;&ccedil;&Oacute;&brvbar;&Oacute;&Atilde;&amp;#38;±à&sup3;&Igrave;">类别：网络应用&amp;编程</A> 
+| <A title=将此文章添加到百度搜藏 onclick="return addToFavor();" 
+href="http://cang.baidu.com/do/add" target=_blank>添加到搜藏</A> | 浏览(<SPAN 
+id=result></SPAN>) | <A 
+href="http://hi.baidu.com/kuangxiangjie/blog/item/c39e27ada26d59014b36d691.html#send">评论</A>&nbsp;(0)
+<SCRIPT language=javascript>
+/*<![CDATA[*/
+var pre = [true,'Ubuntu 命令技巧  (下)', 'Ubuntu 命令技巧  (下)','/kuangxiangjie/blog/item/9b8d20d1552294309b50271b.html'];
+var post = [true,'windump','windump', '/kuangxiangjie/blog/item/661d2f124d648059f819b897.html'];
+if(pre[0] || post[0]){
+	document.write('<div style="height:5px;line-height:5px;">&nbsp;</div><div id="in_nav">');
+	if(pre[0]){
+		document.write('上一篇：<a href="' + pre[3] + '" title="' + pre[1] + '">' +  pre[2] + '</a>&nbsp;&nbsp;&nbsp;&nbsp;');
+	}
+	if(post[0]){
+		document.write('下一篇：<a href="' + post[3] + '" title="' + post[1] + '">' +  post[2] + '</a>');
+	}
+	document.write('</div>');
+}
+/*]]>*/
+</SCRIPT>
+ </DIV>
+<DIV class=line></DIV>
+<STYLE type=text/css>#in_related_doc A {
+	TEXT-DECORATION: none
+}
+</STYLE>
+
+<DIV id=in_related_tmp></DIV>
+<SCRIPT language=javascript type=text/javascript>
+/*<![CDATA[*/
+function HI_MOD_IN_RELATED_DOC_CALLBACK(arg){
+    if(arg.length <= 1) return false;
+    var hasMore = arg[0];
+    var D=function(A,B){A[A.length]=B;}
+    if(arg.length % 2 == 0) D(arg, ["","","",""]);
+
+    var html = ['<div id="in_related_doc"><div class="tit">相关文章：</div>'];
+    D(html, '<table cellpadding="0" cellspacing="3" border="0">');
+    for(var i = 1, j = arg.length; i < j; i += 2){
+        D(html, '<tr>');
+        D(html, '<td width="15px"><a style="font-size:25px" >&#8226;</a></td><td><a href="http://hi.baidu.com/' + arg[i][3] + '/blog/item/' + arg[i][2] + '.html" target="_blank" title="' + arg[i][0] + '">' + arg[i][1] + '</a>');
+        D(html, new Array(10).join('\u3000'));
+        D(html, '</td>');
+        if(arg[i + 1][0] != "")
+            D(html, '<td width="15px"><a style="font-size:25px" >&#8226;</a></td><td><a href="http://hi.baidu.com/' + arg[i + 1][3] + '/blog/item/' + arg[i + 1][2] + '.html" target="_blank" title="' + arg[i + 1][0] + '">' + arg[i + 1][1] + '</a></td>');
+        else
+            D(html, '<td>&nbsp;</td><td>&nbsp;</td>');
+        D(html, '</tr>');
+    }
+    if(hasMore) D(html, '<tr><td colspan="4"><a target="_blank" href="/sys/search?pageno=1&type=7&sort=1&word=%A3%A8%D7%AA%A3%A9TCP%2FIP%20%CA%FD%BE%DD%B0%FC%CD%B7%B8%F1%CA%BD&item=c39e27ada26d59014b36d691">更多&gt;&gt;</a></td></tr>');
+    D(html, '</table></div><div class="line">&nbsp;</div>');
+
+    var div = document.getElementById('in_related_tmp');
+    if(div){
+        div.innerHTML = html.join('');
+        while(div.firstChild){
+            div.parentNode.insertBefore(div.firstChild, div);
+        }
+        div.parentNode.removeChild(div);
+    }
+	window.setTimeout("tracker_init('in_related_doc')",100);
+}
+
+if(RelatedDocData == -1){	// not supported xhr
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = '/sys/search?type=8&word=%A3%A8%D7%AA%A3%A9TCP%2FIP%20%CA%FD%BE%DD%B0%FC%CD%B7%B8%F1%CA%BD&item=c39e27ada26d59014b36d691&t=' + new Date().getTime();
+    document.getElementsByTagName('HEAD')[0].appendChild(script);
+}else if(RelatedDocData == null){
+	GetAndEval = true;
+}else{
+	eval(RelatedDocData);
+}
+
+/*]]>*/
+</SCRIPT>
+
+<DIV id=in_reader>
+<DIV class=tit>最近读者：</DIV>
+<SCRIPT>
+
+	var g_spAnnony=true;
+
+
+var g_read=[
+
+{}
+];
+g_read.length=g_read.length-1;
+
+var _rh1="";
+var _rh2="";
+
+function wrreader(){
+	_rh1 += '<table width="100%" ><tr>';
+	_rh2+='<tr>';
+	if(g_spAnnony){
+		_rh1+='<td align="center" width="10%" ><img border="0" width="55" height="55" src="http://img.baidu.com/hi/img/portraitn.jpg"></td>';
+		_rh2+='<td>&nbsp;</td>';
+		if(g_read.length>0){
+			_rh1+='<td align="left" width="12%">';
+		}else{
+			_rh1+='<td align="left" width="100%">';
+		}
+		_rh1+='<a href="https://passport.baidu.com/?login&tpl=sp&tpl_reg=sp&u='+myref+'" target="_self">登录</a>后，您就出现在这里。</td>';
+		_rh2+='<td>&nbsp;</td>'
+	}
+	if(g_read.length==0){
+		if(!g_spAnnony){
+			_rh1+='<td align=left width="100%">最近还没有登录用户看过这篇文章……</td>';
+			_rh2+='<td>&nbsp;</td>';
+		}
+	}else{
+		for(i=0,len=g_read.length;i<len;i++){
+			_rh1+='<td align="center" valign="bottom" width="10%" class="user"><a href="/'+g_read[i][0]+'" target="_blank"><img border="0" src="http://himg.baidu.com/sys/portraitn/item/'+g_read[i][1]+'.jpg"></a></td>';
+			_rh2+='<td align="center" valign="top" class="user"><a href="/'+g_read[i][0]+'" target="_blank">'+g_read[i][2]+'</a></td>';
+		}
+	}
+	_rh1+='<td width="100%"></td></tr>';
+	_rh2+='<td></td></tr></table>';
+	document.write(_rh1+_rh2);
+}
+
+wrreader();
+</SCRIPT>
+</DIV>
+<DIV class=line></DIV>
+<SCRIPT language=JavaScript>
+allkey=allkey+"065766cff4ad893df8dc61b1_c39e27ada26d59014b36d691_";
+</SCRIPT>
+
+<DIV id=in_comment><A name=comment></A>
+<DIV class=tit>网友评论：</DIV>
+<SCRIPT>
+function writecmt(type,id,cmtname,cmturl,portraitId){
+	var html1="";
+
+	if(type==1){
+			html1="<a href='"+cmturl+"' target='_blank' title='"+cmturl+"'><img  border='0' src='http://himg.baidu.com/sys/portraitn/item/"+portraitId+".jpg'><br>"+cmtname+"</a>";
+	}else{
+		if(cmtname=="" || cmtname=="匿名网友"){
+			if(cmturl==""){
+				html1="<a>匿名网友</a>";
+			}else{
+				html1="<a href='"+cmturl+"' target='_blank' title='"+cmturl+"'>"+cmtname+"</a>";
+			}
+		}else{
+			if(cmturl==""){
+				html1="<div class='f14' style='display:inline'>网友:<a>"+cmtname+"</a></div>";
+			}else{
+				html1="<div class='f14' style='display:inline'>网友:<a href='"+cmturl+"' target='_blank' title='"+cmturl+"'>"+cmtname+"</a></div>";
+			}
+		}
+	}
+	document.write(html1);
+}
+function filterCmtContent(n){
+	if(!BdBrowser.isIE){
+		var defaultfilter1='<span style="filter:glow(color=#000000,strength=2);height:0px;color:#000000">';
+		var defaultfilter2='<span style="height: 0px; color: rgb(0, 0, 0);">';
+		var commentDiv=document.getElementById(n);
+		var divs=commentDiv.getElementsByTagName('div');
+		var d,tmp;
+		for( var i=0,len=divs.length;i<len;i++){
+			d=divs[i];
+			if(d.getAttribute('name')=='cmtcontent'){
+				tmp=d.innerHTML;
+				tmp=tmp.replace(/<span style="filter:glow\(color=#([0-9a-z]{3,6}),strength=2\);height:0px;color:#([0-9a-z]{3,6})">/ig,defaultfilter1);
+				tmp=tmp.replace('<span style="height: 0px; color: rgb(255, 255, 255);">',defaultfilter2);
+				d.innerHTML=tmp;
+			}
+		}
+	}
+}
+
+</SCRIPT>
+
+<DIV id=page></DIV></DIV>
+<SCRIPT>filterCmtContent('in_comment');</SCRIPT>
+
+<DIV id=in_send><A name=send></A>
+<FORM id=popFormSubmit name=form1 onsubmit="return checkcmtform()" 
+action=/kuangxiangjie/commit method=post><INPUT type=hidden value=8 name=ct> 
+<INPUT type=hidden value=1 name=cm> <INPUT type=hidden 
+value=c39e27ada26d59014b36d691 name=spBlogID> <INPUT id=spRefURL type=hidden 
+name=spRefURL>
+<SCRIPT>
+    document.getElementById("spRefURL").value = window.location.href;
+</SCRIPT>
+ 
+<DIV class=tit>发表评论：</DIV>
+<TABLE cellSpacing=5 cellPadding=0 width=620 border=0>
+  <TBODY>
+  <TR>
+    <TD class=f14>姓　名：</TD>
+    <TD><INPUT id=spBlogCmtor style="WIDTH: 220px" onfocus=hidErr(1); 
+      maxLength=49 onchange="checkname('spBlogCmtor')" name=spBlogCmtor>
+      <SCRIPT>
+document.write(" &nbsp;&nbsp; <a href='https://passport.baidu.com/?reg&tpl=sp&return_method=get&skip_ok=1&u=http://hi.baidu.com/sys/reg/' target='_blank'>注册</a>");
+document.write(' | <a href="https://passport.baidu.com/?login&tpl=sp&tpl_reg=sp&u='+myref+'">登录</a>');
+
+</SCRIPT>
+       
+      <DIV id=nmerror style="DISPLAY: none">*姓名最长为50字节</DIV></TD></TR>
+  <TR id=1_err style="DISPLAY: none">
+    <TD>&nbsp;</TD>
+    <TD>
+      <DIV class=error id=1_err_con></DIV></TD></TR>
+  <TR>
+    <TD class=f14>网址或邮箱：</TD>
+    <TD><INPUT id=spBlogCmtURL style="WIDTH: 360px" onfocus=hidErr(2); 
+      maxLength=128 onchange="checkeandu('spBlogCmtURL')" name=spBlogCmtURL> 
+    (选填)</TD>
+    <SCRIPT>
+G("spBlogCmtor").value="";
+G("spBlogCmtURL").value="";
+</SCRIPT>
+  </TR>
+  <TR id=2_err style="DISPLAY: none">
+    <TD>&nbsp;</TD>
+    <TD>
+      <DIV class=error id=2_err_con></DIV></TD></TR>
+  <TR>
+    <TD class=f14 id=reTitle vAlign=top>内　容：</TD>
+    <TD><TEXTAREA id=spBlogCmtText style="WIDTH: 520px; HEIGHT: 155px" onfocus=hidErr(3); name=spBlogCmtText></TEXTAREA>
+      <SCRIPT>
+	var editor=null;
+	try{
+		editor=new BdEditor("spBlogCmtText",{width:"100%",height:"155px"});
+		editor.onfocus = function(){hidErr(3);}
+		editor.render();
+	}catch(e){
+		var spBlogCmtText = document.getElementById("spBlogCmtText");
+		var p = spBlogCmtText.previousSibling;
+		while(p && p.nodeType != 1) p = p.previousSibling;
+		if(p && /bdeditor_container/.test(p.id)){
+			p.parentNode.removeChild(p);
+		}
+		spBlogCmtText.style.display = '';
+		editor=null;
+	}
+</SCRIPT>
+
+      <SCRIPT>
+G("spBlogCmtor").value=G("spBlogCmtor").defaultValue;
+G("spBlogCmtText").value="";
+</SCRIPT>
+       </TD></TR>
+  <TR id=3_err style="DISPLAY: none">
+    <TD>&nbsp;</TD>
+    <TD>
+      <DIV class=error id=3_err_con></DIV></TD></TR>
+  <TR id=vercode>
+    <TD class=f14 vAlign=top>验证码：</TD>
+    <TD vAlign=top><INPUT type=hidden 
+      value=30357370616365313239363633373032313030303030303030303030303030313233373836353631335E7E5EEAE6C793B700C3CB7489C6D7EE 
+      name=spVcode> <INPUT id=spVerifyKey onfocus=f_focus() tabIndex=4 
+      maxLength=4 size=6 name=spVerifyKey autocomplete="off"><BR>
+      <SCRIPT type=text/javascript>
+/*<![CDATA[*/
+var imgsrc="http://hiup.baidu.com/cgi-bin/genimg?30357370616365313239363633373032313030303030303030303030303030313233373836353631335E7E5EEAE6C793B700C3CB7489C6D7EE";
+function f_focus(){
+	if(G('yanzheng').style.display=="none" ){
+		G('verifypic').src=imgsrc;
+		G('yanzheng').style.display="block";
+	}
+}
+function newverifypic(){
+	G("verifypic").src = imgsrc +"&t="+ Math.random();
+	return false;
+}
+/*]]>*/
+</SCRIPT>
+
+      <DIV id=yanzheng style="DISPLAY: none"><IMG id=verifypic height=40 
+      width=120><WBR><A title=看不清左边的字符 onfocus=this.blur(); 
+      onclick="return newverifypic();" 
+      href="http://hi.baidu.com/kuangxiangjie/blog/item/c39e27ada26d59014b36d691.html#">看不清?</A> 
+      </DIV></TD></TR>
+  <TR>
+    <TD class=f14 vAlign=top>&nbsp;</TD>
+    <TD class=f14 vAlign=top><INPUT id=btn_ok tabIndex=5 type=submit value=发表评论 name=btn_ok>&nbsp;&nbsp;&nbsp;&nbsp;<A 
+      id=cancleReLink style="DISPLAY: none; FONT-SIZE: 12px; COLOR: #666" 
+      onclick="canclereply(); return false;" 
+      href="http://hi.baidu.com/kuangxiangjie/blog/item/c39e27ada26d59014b36d691.html#">取消回复</A></TD></TR></TBODY></TABLE></FORM></DIV><BR></DIV>
+<TABLE height=8 cellSpacing=0 cellPadding=0 width="100%" border=0>
+  <TBODY>
+  <TR>
+    <TD class=modbl width=7>&nbsp;</TD>
+    <TD class=modbc>&nbsp;</TD>
+    <TD class=modbr width=7>&nbsp;</TD></TR></TBODY></TABLE></DIV></DIV></DIV></DIV>
+<SCRIPT language=javascript>
+<!--
+var hstr="/kuangxiangjie/brwstat?key1=1";
+document.write("<script src='"+hstr+"&key2="+allkey+"'><\/script>");
+//-->
+</SCRIPT>
+<BR>
+<CENTER>
+<DIV id=ft>&copy;2009 Baidu</DIV></CENTER>
+<SCRIPT>
+if(document.getElementById("m_blog"))
+{
+	var imgarray = document.getElementById("m_blog").getElementsByTagName('img');
+	var imgw = document.getElementById("m_blog").offsetWidth;
+	imgw =imgw-40;
+	for(var i=0; i<imgarray.length; i++){
+	if(imgarray[i].className=="blogimg" && imgarray[i].width>=imgw) imgarray[i].width=imgw;
+	}
+}
+
+// Fix ff bugs
+var blog_text = document.getElementById('blog_text');
+blog_text.innerHTML = blog_text.innerHTML.replace(/href\s*=\s*("|')?(\.\.\/\.\.\/)/gi,"href=$1../$2");
+
+gotoreply();
+</SCRIPT>
+</CENTER><IMG style="DISPLAY: none" src=""> </BODY></HTML>

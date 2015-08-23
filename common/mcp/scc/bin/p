@@ -1,0 +1,1 @@
+ps -fu ${USER} |grep scc |grep -v grep
