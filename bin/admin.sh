@@ -1,16 +1,13 @@
 #!/bin/bash
 #set -x
 
-cd ../
-BASESMCP=`pwd | xargs -i basename {}`
-cd ./bin
-
-FILENAME=`basename $0`
-MCP="easy_mq_mcp.bin"
+doStart()
+{
+    echo start
+    FILENAME=`basename $0`
+MCP="easy_mq_mcp"
 SCC="easy_mq_scc"
 CCS="easy_mq_ccs"
-
-CPU_NUM=`cat /proc/cpuinfo |grep -c processor`
 
 ############### config configure file #########
 
@@ -41,3 +38,51 @@ CPU_NUM=`cat /proc/cpuinfo |grep -c processor`
 	#	./send_restart_msg ${CCS}	
 	fi
 ###############################################################
+}
+
+doStop()
+{
+    echo stop
+    PROC="easy_mq"
+
+echo "stoping ${PROC}...!"
+
+PIDS=`pidof easy_mq_mcp easy_mq_ccs easy_mq_scc`
+
+KILL=0
+for PID in $PIDS
+do
+        kill -s USR2 $PID
+		KILL=1
+done
+
+if [ $KILL = 1 ]
+then
+	echo "stop ${PROC} ok!"
+else
+    echo "Nothing stop!"
+fi
+}
+
+doStatus()
+{
+    echo status
+    PROC="easy_mq"
+
+ps -ef | grep ${PROC} | grep -v grep
+}
+
+opt=$1    
+case "$opt" in
+    "start" )
+    doStart
+    ;;
+    "stop" )
+    echo stop
+    doStop
+    ;;
+    "status" )
+    doStatus
+    ;;
+esac
+    

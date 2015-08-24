@@ -101,9 +101,10 @@ int main(int argc, char* argv[])
 	 *  content
 	 */
 	char szBuffSnd[2048];
-	sprintf(szBuffSnd, "%d", 0x4E534153);
+	memset(szBuffSnd, 0, sizeof(szBuffSnd));
+	*(int *)szBuffSnd = 0x4E534153;
 	int iSendLen = 8+strlen(argv[1]);
-	//*(int*)szBuffSnd = htonl(iSendLen);
+	*((int *)(szBuffSnd + 4)) = iSendLen;
     sprintf(szBuffSnd+8,"%s",argv[1]);
 
 	
