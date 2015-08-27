@@ -1,9 +1,10 @@
 #include <sys/types.h>
 
+#include "easyMsg.h"
 #include "master_ctrl.h"
 
 
-
+using namespace ::EasyMQ;
 
 CMasterCtrl g_tMasterCtrl;
 
@@ -54,10 +55,29 @@ int32_t CMasterCtrl::TimeTick(timeval* ptTick)
 
 int32_t CMasterCtrl::OnReqMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint32_t iUsrCodeLen)
 {
-	char buf[10240];
-	memcpy(buf, pUsrCode, iUsrCodeLen);
 	printMem(pUsrCode, iUsrCodeLen);
 
+	struct Asn20Msg *asnMsg = (struct Asn20Msg *)pUsrCode;
+	struct Msg stMsg;
+	stMsg.fromAsn(*asnMsg);
+
+	switch(stMsg.type)
+	{
+	case Msg::MSG_TYPE_REQ_INIT_TOPIC:
+	    stMsg.type = Msg::MSG_TYPE_RESP_INIT_TOPIC;
+	    stMsg.retCode = Msg::MSG_RET_SUCC;
+	    break;
+	case Msg::MSG_TYPE_REQ_SUBSCRIBE:
+	    stMsg.type = Msg::MSG_TYPE_RESP_PUBLISH;
+	    stMsg.retCode = Msg::MSG_RET_SUCC;
+	    break;
+	case Msg::MSG_TYPE_RESP_PUBLISH:
+	    stMsg.type = Msg::MSG_TYPE_RESP_SUBSCRIBE;
+	    stMsg.retCode = Msg::MSG_RET_SUCC;
+	default:
+	    ERR("Error msg type %d", stMsg.type);
+	    stMsg.retCode = Msg::MSG_RET_FAIL;
+	}
 	SendRsp(pMQHeadInfo, pUsrCode, iUsrCodeLen);
 	return 0;
 }
@@ -68,12 +88,14 @@ int32_t CMasterCtrl::OnRspMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint
 	return 0;
 }
 
-int32_t CMasterCtrl::SendReq(uint32_t uIp, uint32_t uPort, NS_LotteryBons::LotteryBonsMessage* ptReqMsg)
+//pMsg不包含Header
+int32_t CMasterCtrl::SendReq(uint32_t uIp, uint32_t uPort, char *pMsg, uint32_t uLen)
 {
-
-	return 0;//g_pFrameCtrl->SendReq(uIp,uPort,outBuf.DataPtr(),outBuf.DataLen());
+    g_pFrameCtrl->SendReq(uIp,uPort,pMsg,uLen);
+	return 0;
 }
 
+//pOut不包含Header，但是和Header连在一起
 int32_t CMasterCtrl::SendRsp(TMQHeadInfo* pMQHeadInfo, char *pOut, uint32_t iLen)
 {
     g_pFrameCtrl->SendRsp(pMQHeadInfo,pOut,iLen);
