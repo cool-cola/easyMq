@@ -48,7 +48,7 @@ namespace EasyMQ
         void toAsn(struct Asn20Msg &stAsnMsg)
         {
             stAsnMsg.msgLen = this->uBufLen + sizeof(struct Msg) - 4;//扣除cBuf大小
-            memcpy(stAsnMsg.cBuf, stAsnMsg.cBuf, uBufLen);
+            memcpy(stAsnMsg.cBuf, (char *)this, uBufLen);
         }
 
         void fromAsn(const struct Asn20Msg &stAsnMsg)

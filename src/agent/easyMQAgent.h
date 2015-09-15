@@ -8,7 +8,14 @@
 #ifndef SRC_AGENT_EASYMQAGENT_H_
 #define SRC_AGENT_EASYMQAGENT_H_
 
-
+#include "easyMsg.h"
+class EasyMQAgent
+{
+public:
+	int32_t initTopic(const std::string &topic);
+	int32_t recvMsg(struct Msg &msg);
+	int32_t sendMsg(const struct Msg &msg);
+};
 
 
 

@@ -49,10 +49,10 @@ int ReadCfg( char *DestIp, int &iDestPort)
 		printf("open conf.cfg failed!\n");
 		return -1;
 	}
-	
+
 	char pCfgName[512];
 	int i;
-	while(NULL != fgets(m_pCurLine,sizeof(m_pCurLine)-1,m_fpFile))                        
+	while(NULL != fgets(m_pCurLine,sizeof(m_pCurLine)-1,m_fpFile))
 	{
 		i=0;
 		while(m_pCurLine[i] == ' ') {i++;}
@@ -65,9 +65,9 @@ int ReadCfg( char *DestIp, int &iDestPort)
 			if (3 != sscanf(m_pCurLine,"%s %s %d",pCfgName,DestIp,&iDestPort))
 			{
 				printf("reading conf.cfg failed!\n");
-				return -1; 
+				return -1;
 			}
-		} 			
+		}
 		else
 		{
 			continue;
@@ -76,14 +76,47 @@ int ReadCfg( char *DestIp, int &iDestPort)
 	fclose(m_fpFile);
 	return 0;
 }
+
+int32_t testInitTopic()
+{
+	int32_t iRet = 0;
+
+	return iRet;
+}
+
+int32_t testTransferMsg()
+{
+	int32_t iRet = 0;
+	return iRet;
+}
+
+int32_t testInitTopicMulti()
+{
+	return 0;
+}
+
+int32_t testTransferMsgMulti()
+{
+	return 0;
+}
+
+int32_t testTransferSpeed()
+{
+	return 0;
+}
+
+int32_t testRecvMsgSpeed()
+{
+	return 0;
+}
 int main(int argc, char* argv[])
 {
-	if(argc < 2)    
-	{        
-		SHOWUSAGE	 
-		return 0;    
+	if(argc < 2)
+	{
+		SHOWUSAGE
+		return 0;
 	}
-	
+
        char DestIp[16];
        int iDestPort = 0;
 	ReadCfg(DestIp,iDestPort);
@@ -107,10 +140,10 @@ int main(int argc, char* argv[])
 	*((int *)(szBuffSnd + 4)) = iSendLen;
     sprintf(szBuffSnd+8,"%s",argv[1]);
 
-	
+
 	printf("SEND=>>\n");
 	PrintBin(szBuffSnd,iSendLen);
-	
+
 	timeval t1,t2;
 	gettimeofday(&t1,NULL);
 	stTcpCltSocket.TcpWrite(szBuffSnd,iSendLen);
@@ -122,7 +155,7 @@ int main(int argc, char* argv[])
 	{
 		printf("read from %s:%d failed!\n",DestIp,iDestPort);
 		return -1;
-	}	
+	}
 	gettimeofday(&t2,NULL);
 
 	PrintBin(szIn,iReadLen);
