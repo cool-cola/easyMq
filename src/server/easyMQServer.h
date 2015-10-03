@@ -5,8 +5,7 @@
  *      Author: millerzhao
  */
 #include "easyMsg.h"
-extern EasyMQServer g_easyMQServer;
-
+#include <string>
 namespace EasyMQ
 {
     class EasyMQAgent
@@ -26,6 +25,8 @@ namespace EasyMQ
             int32_t sendMsgToAgent(const Msg *pMsg, const EasyMQAgent &agent);
 
     };
+
+    //extern EasyMQServer g_easyMQServer;
 }
 
 

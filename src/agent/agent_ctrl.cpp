@@ -1,7 +1,7 @@
 #include <sys/types.h>
 
-#include "easyMQServer.h"
-#include "master_ctrl.h"
+#include "easyMQAgent.h"
+#include "agent_ctrl.h"
 
 CAgentCtrl g_tAgentCtrl;
 
@@ -94,7 +94,7 @@ int32_t CAgentCtrl::SendRsp(TMQHeadInfo* pMQHeadInfo, char *pOut, uint32_t iLen)
 
 int32_t CAgentCtrl::RecvMsg(const struct Msg *pMsg)
 {
-	struct Msg &curMsg = listMsg.pop_front();
+	struct Msg curMsg(listMsg.pop_front());
 	pMsg = &curMsg;
 	return 0;
 }

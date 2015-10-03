@@ -9,6 +9,7 @@
 #define SRC_AGENT_EASYMQAGENT_H_
 
 #include "easyMsg.h"
+#include <string>
 class EasyMQAgent
 {
 public:

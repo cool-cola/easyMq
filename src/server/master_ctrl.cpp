@@ -4,7 +4,7 @@
 #include "master_ctrl.h"
 
 CMasterCtrl g_tMasterCtrl;
-
+extern EasyMQServer g_easyMQServer;
 /////////////////////////////////////////////////////////////////////////////////////
 
  void printMem(char *pMem, int len)
@@ -55,22 +55,22 @@ int32_t CMasterCtrl::ProcessInitTopic(TMQHeadInfo *pMQHeadInfo, const struct Msg
     EasyMQAgent agent;
     agent.ipAddr = pMQHeadInfo->m_unClientIP;
     agent.port = pMQHeadInfo->m_usClientPort;
-    g_easyMQServer.initTopic((std::string)stMsg.topic,agent);
-    stMsg.type = Msg::MSG_TYPE_RESP_INIT_TOPIC;
-    stMsg.retCode = Msg::MSG_RET_SUCC;
-    SendRsp(pMQHeadInfo, (char *)&stMsg, sizeof(stMsg));
+    std::string topic(stMsg.cBuf);
+    g_easyMQServer.initTopic(topic,agent);
+    struct Msg curMsg(stMsg);
+    curMsg.type = Msg::MSG_TYPE_RESP_INIT_TOPIC;
+    curMsg.retCode = Msg::MSG_RET_SUCC;
+    SendRsp(pMQHeadInfo, (char *)&curMsg, sizeof(curMsg));
 	return 0;
 }
 
 int32_t CMasterCtrl::ProcessMsg(TMQHeadInfo *pMQHeadInfo, const struct Msg &stMsg)
 {
-    EasyMQAgent agent;
-    agent.ipAddr = pMQHeadInfo->m_unClientIP;
-    agent.port = pMQHeadInfo->m_usClientPort;
     g_easyMQServer.transferMsg(&stMsg);
-    stMsg.type = Msg::MSG_TYPE_RESP_INIT_TOPIC;
-    stMsg.retCode = Msg::MSG_RET_SUCC;
-    SendRsp(pMQHeadInfo, (char *)&stMsg, sizeof(stMsg));
+    struct Msg curMsg(stMsg);
+    curMsg.type = Msg::MSG_TYPE_RESP_INIT_TOPIC;
+    curMsg.retCode = Msg::MSG_RET_SUCC;
+    SendRsp(pMQHeadInfo, (char *)&curMsg, sizeof(curMsg));
 	return 0;
 }
 int32_t CMasterCtrl::OnReqMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint32_t iUsrCodeLen)
@@ -109,8 +109,9 @@ int32_t CMasterCtrl::OnRspMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint
 	struct Asn20Msg *asnMsg = (struct Asn20Msg *)pUsrCode;
 	struct Msg stMsg;
 	stMsg.fromAsn(*asnMsg);
+	int32_t retType = stMsg.type;
 
-	switch(stMsg.type)
+	switch(retType)
 	{
 	case Msg::MSG_RET_SUCC:
 		INFO("Msg Ok!");

@@ -6,13 +6,22 @@ Date: 2010
 Description: ������Ϣ�Ĳ��Թ���
 ***********************************************************/
 
+#include <assert.h>
 #include "TSocket.h"
 #include <sys/time.h>
-
+#include <stdlib.h>
+TcpCltSocket stTcpCltSocket;
+timeval t1,t2;
+char DestIp[16];
+int iDestPort = 0;
 #define SHOWUSAGE \
 {\
 printf("%s [data]\n",argv[0]);\
 }
+
+
+int32_t sendMsg(char *buf, int32_t iLen);
+int32_t recvMsg(char *buf, int32_t iLen);
 
 void PrintBin(char *pBuffer, int iLength )
 {
@@ -77,10 +86,10 @@ int ReadCfg( char *DestIp, int &iDestPort)
 	return 0;
 }
 
-int32_t testInitTopic()
+int32_t testInitTopic(char *pTopic)
 {
 	int32_t iRet = 0;
-
+	iRet = sendMsg(pTopic, strlen(pTopic));
 	return iRet;
 }
 
@@ -109,45 +118,33 @@ int32_t testRecvMsgSpeed()
 {
 	return 0;
 }
-int main(int argc, char* argv[])
+
+int32_t sendMsg(char *buf, int32_t iLen)
 {
-	if(argc < 2)
-	{
-		SHOWUSAGE
-		return 0;
-	}
-
-       char DestIp[16];
-       int iDestPort = 0;
-	ReadCfg(DestIp,iDestPort);
-	//-----------------------------------
-
-	TcpCltSocket stTcpCltSocket;
-	if(!stTcpCltSocket.ConnectServer(inet_addr(DestIp), iDestPort))
-	{
-		printf("connect %s:%d failed!\n",DestIp,iDestPort);
-		return -1;
-	}
-
 	//按照asn2.0的编码要求
 	/*  0x4E534153 len
 	 *  content
 	 */
-	char szBuffSnd[2048];
-	memset(szBuffSnd, 0, sizeof(szBuffSnd));
-	*(int *)szBuffSnd = 0x4E534153;
-	int iSendLen = 8+strlen(argv[1]);
-	*((int *)(szBuffSnd + 4)) = iSendLen;
-    sprintf(szBuffSnd+8,"%s",argv[1]);
+	char bufSend[2048];
+	memset(bufSend, 0, sizeof(bufSend));
+	//设置消息头
+	*(int *)bufSend = 0x4E534153;
+	int iSendLen = 8+iLen;
+
+	//设置消息体
+	*((int *)(bufSend + 4)) = iSendLen;
+	sprintf(bufSend+8,"%s",buf);
 
 
 	printf("SEND=>>\n");
-	PrintBin(szBuffSnd,iSendLen);
-
-	timeval t1,t2;
+	PrintBin(bufSend,iSendLen);
 	gettimeofday(&t1,NULL);
-	stTcpCltSocket.TcpWrite(szBuffSnd,iSendLen);
+	stTcpCltSocket.TcpWrite(bufSend,iSendLen);
+	return 0;
+}
 
+int32_t recvMsg(char *buf, int32_t iLen)
+{
 	printf("\n\nRECV=>>\n");
 	char szIn[65535];
 	int iReadLen = stTcpCltSocket.TcpRead(szIn, sizeof(szIn));
@@ -162,7 +159,25 @@ int main(int argc, char* argv[])
 
 	printf("\ncost %ld us\n",(t2.tv_sec-t1.tv_sec)*1000000+
 		t2.tv_usec-t1.tv_usec);
+	memcpy(buf, szIn, iReadLen);
+	return 0;
+}
 
+void init()
+{
+	ReadCfg(DestIp,iDestPort);
+	//-----------------------------------
+	if(!stTcpCltSocket.ConnectServer(inet_addr(DestIp), iDestPort))
+	{
+		printf("connect %s:%d failed!\n",DestIp,iDestPort);
+		exit(1) ;
+	}
+}
+int main(int argc, char* argv[])
+{
+	int32_t iRet = 0;
+	iRet = testInitTopic("yafngzh");
+	assert(!iRet);
 	return 0;
 
 }

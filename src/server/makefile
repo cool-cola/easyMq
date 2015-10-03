@@ -27,7 +27,10 @@ COMMON_OBJ = frame_svrd.o frame_ctrl.o \
 	../../common/comm_mysql/comm_mysql.o
 
 OBJS = $(COMMON_OBJ) \
-	master_ctrl.o
+	master_ctrl.o \
+	frame_ctrl.o \
+	frame_svrd.o \
+	easyMQServer.o
 
 all: $(BIN)
 

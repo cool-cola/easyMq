@@ -2,6 +2,7 @@
 #define _DEFINE_AGENT_CTRL_HEADER_
 
 #include "frame_ctrl.h"
+#include <list>
 #include "easyMsg.h"
 
 #define SVR_NAME " agent"

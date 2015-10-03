@@ -10,22 +10,22 @@
 #include <set>
 using ::EasyMQ::EasyMQServer;
 using ::EasyMQ::EasyMQAgent;
-std::map<std::string, std::set<EasyMQAgent>> g_mapTopicToAgent;
+std::map<std::string, std::set<EasyMQAgent> > g_mapTopicToAgent;
 
 extern CMasterCtrl g_tMasterCtrl;
 EasyMQServer g_easyMQServer;
 int32_t EasyMQServer::initTopic(const std::string &topic, const EasyMQAgent &agent)
 {
     std::set<EasyMQAgent> setAgent;
-    std::map<std::string, std::set<EasyMQAgent>>::iterator it = g_mapTopicToAgent.find(topic);
+    std::map<std::string, std::set<EasyMQAgent> >::iterator it = g_mapTopicToAgent.find(topic);
     if(it == g_mapTopicToAgent.end())
     {
-        setAgent.insert(agent);
+        //setAgent.insert(agent);
         g_mapTopicToAgent[topic] = setAgent;
     }
     else
     {
-        it->second.insert(agent);
+        //it->second.insert(agent);
     }
 
     return 0;
@@ -33,7 +33,7 @@ int32_t EasyMQServer::initTopic(const std::string &topic, const EasyMQAgent &age
 
 int32_t EasyMQServer::transferMsg(const Msg *pMsg)
 {
-	std::map<std::string, std::set<EasyMQAgent>>::iterator it = g_mapTopicToAgent.find(pMsg->topic);
+	std::map<std::string, std::set<EasyMQAgent> >::iterator it = g_mapTopicToAgent.find(std::string(pMsg->cBuf));
     if(it == g_mapTopicToAgent.end())
     {
         return -1;

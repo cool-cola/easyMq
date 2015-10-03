@@ -15,7 +15,7 @@ namespace EasyMQ
     struct Asn20Msg
     {
         uint32_t msgTag;
-        uint32_t msgLen;
+        uint32_t msgLen; //实际的长度，不包含包头的长度
         char cBuf[0];
     };
 
@@ -41,23 +41,19 @@ namespace EasyMQ
 
         MsgType type;
         MsgRet retCode;
-        uint32_t uBufLen;
-        char topic[32];
+        uint32_t uBufLen;//最后cBuf的大小
         char cBuf[0];
 
         void toAsn(struct Asn20Msg &stAsnMsg)
         {
-            stAsnMsg.msgLen = this->uBufLen + sizeof(struct Msg) - 4;//扣除cBuf大小
-            memcpy(stAsnMsg.cBuf, (char *)this, uBufLen);
+        	//计算变长结构体数组的大小
+            stAsnMsg.msgLen = sizeof(type) + sizeof(retCode) + sizeof(uBufLen) + uBufLen;
+            memcpy(stAsnMsg.cBuf, (char *)this, stAsnMsg.msgLen);
         }
 
         void fromAsn(const struct Asn20Msg &stAsnMsg)
         {
-            //TODO: 需要考虑到cBuf大小
-            struct Msg *pMsg = (struct Msg*)stAsnMsg.cBuf;
-            this->type = pMsg->type;
-            this->retCode = pMsg->retCode;
-            memcpy(this->topic, pMsg->topic, sizeof(this->topic));
+            memcpy((char *)this, stAsnMsg.cBuf, stAsnMsg.msgLen);
         }
     };
 }

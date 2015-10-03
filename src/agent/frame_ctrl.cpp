@@ -1,5 +1,5 @@
 #include "frame_ctrl.h"
-#include "master_ctrl.h"
+#include "agent_ctrl.h"
 
 #define likely(x) __builtin_expect((x),1)
 #define unlikely(x) __builtin_expect((x),0)
@@ -19,7 +19,7 @@
 
 ///////////////////////////////////////////////////////////////////
 
-extern CMasterCtrl g_tMasterCtrl;
+extern CAgentCtrl g_tAgentCtrl;
 
 ///////////////////////////////////////////////////////////////////
 
@@ -50,7 +50,7 @@ void CFrameCtrl::Ver(FILE *pFileFp)
 {
     fprintf(pFileFp, "build in %s %s\n", __DATE__, __TIME__);
 	fprintf(pFileFp, "frame ctrl create in 2014-07-02\n");
-	g_tMasterCtrl.Ver(pFileFp);
+	g_tAgentCtrl.Ver(pFileFp);
     fprintf(pFileFp, "\n");
 
     return;
@@ -110,9 +110,9 @@ int32_t CFrameCtrl::Initialize(char *pProName, char *pConfigFile)
         sched_setaffinity(0, sizeof(mask), &mask);
         printf("Main Thread set cpu affinity %d\n", iCpuId);
     }
-	if(g_tMasterCtrl.Init(m_stConfig.m_szCtrlConf))
+	if(g_tAgentCtrl.Init(m_stConfig.m_szCtrlConf))
 	{
-		printf("Init MasterCtrl Failed!\n");
+		printf("Init AgentCtrl Failed!\n");
 		return -1;
 	}
 
@@ -377,7 +377,7 @@ int32_t CFrameCtrl::ReadCfgFile(char *szCfgFile)
 
     m_stConfig.Print();
 
-    return 0;
+    return iRet;
 }
 
 int32_t CFrameCtrl::SetRunFlag(int32_t iRunFlag)
@@ -423,7 +423,7 @@ int32_t CFrameCtrl::TimeTick()
 {
     gettimeofday(&m_tNow, NULL);
 
-	g_tMasterCtrl.TimeTick(&m_tNow);
+	g_tAgentCtrl.TimeTick(&m_tNow);
     //дͳ��
     WriteStat();
     return 0;
@@ -480,7 +480,7 @@ int32_t CFrameCtrl::Run()
             iDoMsgLen += iCodeLength;
 
             //
-            g_tMasterCtrl.OnReqMessage((TMQHeadInfo *)pMsgBuff, pMsgBuff + sizeof(TMQHeadInfo), iCodeLength - sizeof(TMQHeadInfo));
+            g_tAgentCtrl.OnReqMessage((TMQHeadInfo *)pMsgBuff, pMsgBuff + sizeof(TMQHeadInfo), iCodeLength - sizeof(TMQHeadInfo));
 
             if (iGetPtrLen > 0)
             {
@@ -515,7 +515,7 @@ int32_t CFrameCtrl::Run()
             iDoMsgLen += iCodeLength;
 
             //
-            g_tMasterCtrl.OnRspMessage((TMQHeadInfo *)pMsgBuff, pMsgBuff + sizeof(TMQHeadInfo), iCodeLength - sizeof(TMQHeadInfo));
+            g_tAgentCtrl.OnRspMessage((TMQHeadInfo *)pMsgBuff, pMsgBuff + sizeof(TMQHeadInfo), iCodeLength - sizeof(TMQHeadInfo));
 
             if (iGetPtrLen > 0)
             {
