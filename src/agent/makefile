@@ -2,7 +2,7 @@ OPT = -g -Wall -Wno-deprecated -Wno-non-template-friend
 CXX = g++ $(OPT)
 CC= gcc $(OPT)
 
-BIN = easy_mq_mcp
+BIN = easy_mq_agent
 INC = -I./ -I../../common
 LIB = -lpthread -ldl
 

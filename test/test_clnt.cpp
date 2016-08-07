@@ -3,11 +3,12 @@ Copyright (C), 1988-1999
 Author:nekeyzhong
 Version :1.0
 Date: 2010
-Description: ������Ϣ�Ĳ��Թ���
+Description: 
 ***********************************************************/
 
 #include <assert.h>
 #include "TSocket.h"
+#include <string.h>
 #include <sys/time.h>
 #include <stdlib.h>
 TcpCltSocket stTcpCltSocket;
@@ -19,6 +20,7 @@ int iDestPort = 0;
 printf("%s [data]\n",argv[0]);\
 }
 
+#define MAX_LENGTH 2048
 
 int32_t sendMsg(char *buf, int32_t iLen);
 int32_t recvMsg(char *buf, int32_t iLen);
@@ -89,7 +91,13 @@ int ReadCfg( char *DestIp, int &iDestPort)
 int32_t testInitTopic(char *pTopic)
 {
 	int32_t iRet = 0;
+	char buf[MAX_LENGTH] = {0};
 	iRet = sendMsg(pTopic, strlen(pTopic));
+	if(iRet != 0)
+	{
+	    return iRet;
+	}
+	iRet = recvMsg(buf, MAX_LENGTH);
 	return iRet;
 }
 
@@ -176,6 +184,7 @@ void init()
 int main(int argc, char* argv[])
 {
 	int32_t iRet = 0;
+	init();
 	iRet = testInitTopic("yafngzh");
 	assert(!iRet);
 	return 0;

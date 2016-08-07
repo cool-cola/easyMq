@@ -1,4 +1,5 @@
 #include <sys/types.h>
+#include <stdio.h>
 
 #include "easyMQAgent.h"
 #include "agent_ctrl.h"
@@ -6,12 +7,9 @@
 CAgentCtrl g_tAgentCtrl;
 
 /////////////////////////////////////////////////////////////////////////////////////
+using namespace ::EasyMQ;
 
 CAgentCtrl::CAgentCtrl()
-{
-}
-
-CAgentCtrl::~CAgentCtrl()
 {
 }
 
@@ -37,18 +35,18 @@ int32_t CAgentCtrl::TimeTick(timeval* ptTick)
 int32_t CAgentCtrl::OnReqMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint32_t iUsrCodeLen)
 {
 	struct Asn20Msg *asnMsg = (struct Asn20Msg *)pUsrCode;
-	struct Msg stMsg;
+	struct ::EasyMQ::Msg stMsg;
 	stMsg.fromAsn(*asnMsg);
 
 	switch(stMsg.type)
 	{
-	case Msg::MSG_TYPE_RESP_PUBLISH:
-	    stMsg.type = Msg::MSG_TYPE_RESP_SUBSCRIBE;
-	    stMsg.retCode = Msg::MSG_RET_SUCC;
+		case ::EasyMQ::Msg::MSG_TYPE_RESP_PUBLISH:
+	    stMsg.type = ::EasyMQ::Msg::MSG_TYPE_RESP_SUBSCRIBE;
+	    stMsg.retCode = ::EasyMQ::Msg::MSG_RET_SUCC;
 	    break;
 	default:
 	    ERR("Error msg type %d", stMsg.type);
-	    stMsg.retCode = Msg::MSG_RET_FAIL;
+	    stMsg.retCode = ::EasyMQ::Msg::MSG_RET_FAIL;
 	}
 	listMsg.push_back(stMsg);
 	SendRsp(pMQHeadInfo, pUsrCode, iUsrCodeLen);
@@ -57,18 +55,18 @@ int32_t CAgentCtrl::OnReqMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint3
 
 int32_t CAgentCtrl::OnRspMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint32_t iUsrCodeLen)
 {
-	printMem(pUsrCode, iUsrCodeLen);
+	//printMem(pUsrCode, iUsrCodeLen);
 
 	struct Asn20Msg *asnMsg = (struct Asn20Msg *)pUsrCode;
-	struct Msg stMsg;
+	struct ::EasyMQ::Msg stMsg;
 	stMsg.fromAsn(*asnMsg);
 
 	switch(stMsg.type)
 	{
-	case Msg::MSG_RET_SUCC:
+		case ::EasyMQ::Msg::MSG_RET_SUCC:
 		INFO("Msg Ok!");
 		break;
-	case Msg::MSG_RET_FAIL:
+		case ::EasyMQ::Msg::MSG_RET_FAIL:
 		ERR("Msg error!");
 		break;
 	default:
@@ -92,9 +90,10 @@ int32_t CAgentCtrl::SendRsp(TMQHeadInfo* pMQHeadInfo, char *pOut, uint32_t iLen)
 	return 0;
 }
 
-int32_t CAgentCtrl::RecvMsg(const struct Msg *pMsg)
+int32_t CAgentCtrl::RecvMsg(const struct ::EasyMQ::Msg *pMsg)
 {
-	struct Msg curMsg(listMsg.pop_front());
+	struct ::EasyMQ::Msg curMsg = listMsg.front();
 	pMsg = &curMsg;
+	listMsg.pop_front();
 	return 0;
 }

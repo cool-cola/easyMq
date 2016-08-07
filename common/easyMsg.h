@@ -30,7 +30,10 @@ namespace EasyMQ
             MSG_TYPE_RESP_PUBLISH = 0x21,
 
             MSG_TYPE_REQ_SUBSCRIBE = 0x12,
-            MSG_TYPE_RESP_SUBSCRIBE = 0x22
+            MSG_TYPE_RESP_SUBSCRIBE = 0x22,
+
+            MSG_TYPE_REQ_ECHO = 0x31,
+            MSG_TYPE_RESP_ECHO = 0x32
         };
 
         enum MsgRet

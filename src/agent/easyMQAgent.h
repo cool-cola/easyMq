@@ -14,8 +14,8 @@ class EasyMQAgent
 {
 public:
 	int32_t initTopic(const std::string &topic);
-	int32_t recvMsg(struct Msg &msg);
-	int32_t sendMsg(const struct Msg &msg);
+	int32_t recvMsg(struct ::EasyMQ::Msg &msg);
+	int32_t sendMsg(const struct ::EasyMQ::Msg &msg);
 };
 
 

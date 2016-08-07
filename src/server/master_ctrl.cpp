@@ -94,6 +94,9 @@ int32_t CMasterCtrl::OnReqMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint
 	    stMsg.type = Msg::MSG_TYPE_RESP_SUBSCRIBE;
 	    stMsg.retCode = Msg::MSG_RET_SUCC;
 	    break;
+	case Msg::MSG_TYPE_REQ_ECHO:
+		stMsg.type = Msg::MSG_TYPE_RESP_ECHO;
+		stMsg.retCode = Msg::MSG_RET_SUCC;
 	default:
 	    ERR("Error msg type %d", stMsg.type);
 	    stMsg.retCode = Msg::MSG_RET_FAIL;

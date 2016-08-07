@@ -61,7 +61,7 @@ int32_t CFrameCtrl::Initialize(char *pProName, char *pConfigFile)
     //������
     strcpy(m_stConfig.m_szSvrName, pProName);
     LoadMcpIdx();
-    if (ReadCfgFile(pConfigFile))
+    if (this->ReadCfgFile(pConfigFile))
     {
         printf("ReadCfgFile %s failed!\n", pConfigFile);
         return -1;

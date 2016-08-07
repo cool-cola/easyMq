@@ -101,6 +101,7 @@ int32_t CFrameCtrl::Initialize(char *pProName, char *pConfigFile)
     m_tEpoll.Add(m_CCSToMeMQ->GetReadNotifyFD(), m_CCSToMeMQ->GetReadNotifyFD(), EPOLLIN);
     m_tEpoll.Add(m_SCCToMeMQ->GetReadNotifyFD(), m_SCCToMeMQ->GetReadNotifyFD(), EPOLLIN);
 
+
     if (m_stConfig.m_iBindCpu >= 0)
     {
         cpu_set_t mask;
@@ -141,7 +142,6 @@ int32_t CFrameCtrl::InitCodeQueue()
     static CCodeQueueMutil ccs2meCodeQueueMutil, me2ccsCodeQueueMutil;
     static CCodeQueue scc2meCodeQueue, me2sccCodeQueue;
 
-    //����IN �����ڴ�ܵ�
     ret = CCodeQueueMutil::CreateMQByFile(m_stConfig.m_szCCSToMeMQ, &ccs2meCodeQueueMutil);
     if (ret)
     {
@@ -155,7 +155,6 @@ int32_t CFrameCtrl::InitCodeQueue()
         return -2;
     }
 
-    //����SCC�����ڴ�ܵ�
     if (CCodeQueue::CreateMQByFile(m_stConfig.m_szSCCToMeMQ, &scc2meCodeQueue))
     {
         ERR("SCC To Me pipe create failed!\n");
@@ -183,7 +182,6 @@ int32_t CFrameCtrl::InitCodeQueue()
 
 int32_t CFrameCtrl::LogInit()
 {
-    //��־����
     char szTmp[256];
 
     sprintf(szTmp, "if [ -f './.%s_ctrllog' ];then echo '.%s_ctrllog exist';else touch ./.%s_ctrllog;fi",
@@ -204,7 +202,7 @@ int32_t CFrameCtrl::LogInit()
         memset((char *)m_stConfig.m_pShmLog, 0, sizeof(TShmLog));
         m_stConfig.m_pShmLog->m_iLogLevel = RUNLOG;
     }
-
+	i-3
     sprintf(m_stConfig.m_szLogFileBase, "../log/%s", m_stConfig.m_szSvrName);
 
     TLib_Log_LogInit(m_stConfig.m_szLogFileBase, m_stConfig.m_iMaxLogSize, m_stConfig.m_iMaxLogNum);
@@ -220,7 +218,7 @@ void CFrameCtrl::Log(int32_t iKey, int32_t iLevel, const char *sFormat, ...)
         iWriteLog = 1;
     }
 
-    //���μ������Ҫ��ļ���
+	//日志的打印级别
     if (iLevel <= m_stConfig.m_pShmLog->m_iLogLevel)
     {
         iWriteLog = 1;

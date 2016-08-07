@@ -10,7 +10,6 @@
 #define MIDDLE "0"
 #define MINOR "1"
 #define VER (MAJOR "." MIDDLE "." MINOR)
-using namespace ::EasyMQ;
 
 extern CFrameCtrl* g_pFrameCtrl;
 
@@ -34,16 +33,11 @@ extern CFrameCtrl* g_pFrameCtrl;
     g_pFrameCtrl->Log(0,RUNLOG, "[file:%s:%d]%s\r\n" format, __FILE__, __LINE__, __FUNCTION__,##__VA_ARGS__)
 #endif
 
-namespace NS_LotteryBons
-{
-	class LotteryBonsMessage;
-}
-
 class CAgentCtrl
 {
 public:
 	CAgentCtrl();
-	~CAgentCtrl();
+	~CAgentCtrl(){}
 	int32_t Ver(FILE *pFileFp);
 	int32_t Init(const char* pszConf);
 	int32_t InitTopic(const std::string &);
@@ -55,9 +49,9 @@ public:
 
 	int32_t SendReq(uint32_t uIp, uint32_t uPort, char* ptReqMsg, uint32_t iLen);
 	int32_t SendRsp(TMQHeadInfo* pMQHeadInfo, char *pOut, uint32_t iLen);
-	int32_t RecvMsg(const struct Msg *);
+	int32_t RecvMsg(const struct ::EasyMQ::Msg *);
 private:
-	std::list<struct Msg> listMsg;
+	std::list<struct ::EasyMQ::Msg> listMsg;
 };
 
 #endif
