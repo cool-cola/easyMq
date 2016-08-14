@@ -14,20 +14,24 @@ std::map<std::string, std::set<EasyMQAgent> > g_mapTopicToAgent;
 
 extern CMasterCtrl g_tMasterCtrl;
 EasyMQServer g_easyMQServer;
-int32_t EasyMQServer::initTopic(const char *topic, const EasyMQAgent &agent)
+int32_t EasyMQServer::initTopic(const string &topic, const EasyMQAgent &agent)
 {
-	INFO("receive msg %s from ip %d port %d",topic,agent.ipAddr,agent.port);
+	INFO("receive msg %s from ip %d port %d",topic.c_str(),agent.ipAddr,agent.port);
     std::set<EasyMQAgent> setAgent;
     std::map<std::string, std::set<EasyMQAgent> >::iterator it = g_mapTopicToAgent.find(topic);
     if(it == g_mapTopicToAgent.end())
     {
-        //setAgent.insert(agent);
-		std::string strTopic(topic);
-        g_mapTopicToAgent[strTopic] = setAgent;
+		INFO("First initialize the topic, insert directly");
+		setAgent.insert(agent);
+        g_mapTopicToAgent[topic] = setAgent;
     }
     else
     {
-        //it->second.insert(agent);
+		if(it->second.end() == it->second.find(agent))
+		{
+			INFO("Not find agent,now insert");
+			it->second.insert(agent);
+		}
     }
 
     return 0;

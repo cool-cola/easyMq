@@ -33,11 +33,6 @@ extern CFrameCtrl* g_pFrameCtrl;
     g_pFrameCtrl->Log(0,RUNLOG, "[file:%s:%d]%s\r\n" format, __FILE__, __LINE__, __FUNCTION__,##__VA_ARGS__)
 #endif
 
-namespace NS_LotteryBons
-{
-	class LotteryBonsMessage;
-}
-
 class CMasterCtrl
 {
 public:
@@ -54,8 +49,8 @@ public:
 	int32_t SendReq(uint32_t uIp, uint32_t uPort, char* ptReqMsg, uint32_t iLen);
 	int32_t SendRsp(TMQHeadInfo* pMQHeadInfo, char *pOut, uint32_t iLen);
 protected:
-	int32_t ProcessInitTopic(TMQHeadInfo *pMQHeadInfo, const struct Msg &stMsg);
-	int32_t ProcessMsg(TMQHeadInfo *pMQHeadInfo, const struct Msg &stMsg);
+	int32_t ProcessInitTopic(TMQHeadInfo *pMQHeadInfo, const struct Msg *pstMsg);
+	int32_t ProcessMsg(TMQHeadInfo *pMQHeadInfo, const struct Msg *pstMsg);
 
 };
 

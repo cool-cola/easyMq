@@ -7,18 +7,18 @@ CMasterCtrl g_tMasterCtrl;
 extern EasyMQServer g_easyMQServer;
 /////////////////////////////////////////////////////////////////////////////////////
 
- void printMem(char *pMem, int len)
+void printMem(char *pMem, int len)
 {
     for(int i = 0; i < len; ++i)
     {
-        INFO("0x%x", pMem[i]);
+        printf("0x%x", pMem[i]);
         if(i % 4 == 0)
         {
-            INFO("\n");
+            printf("\n");
         }
         else
         {
-            INFO(" ");
+            printf(" ");
         }
     }
 }
@@ -50,16 +50,14 @@ int32_t CMasterCtrl::TimeTick(timeval* ptTick)
 	return 0;
 }
 
-int32_t CMasterCtrl::ProcessInitTopic(TMQHeadInfo *pMQHeadInfo, const struct Msg &stMsg)
+int32_t CMasterCtrl::ProcessInitTopic(TMQHeadInfo *pMQHeadInfo, const struct Msg *pstMsg)
 {
     EasyMQAgent agent;
     agent.ipAddr = pMQHeadInfo->m_unClientIP;
     agent.port = pMQHeadInfo->m_usClientPort;
-	char buf[1024];
-	memcpy(buf,stMsg.cBuf,stMsg.uBufLen);
-	buf[stMsg.uBufLen] = '\0';
-    g_easyMQServer.initTopic(buf,agent);
-    struct Msg curMsg(stMsg);
+	std::string topic(pstMsg->cBuf,pstMsg->uBufLen);
+    g_easyMQServer.initTopic(topic,agent);
+    struct Msg curMsg(*pstMsg);
 	char sendBuf[1024];
     curMsg.type = Msg::MSG_TYPE_RESP_INIT_TOPIC;
     curMsg.retCode = Msg::MSG_RET_SUCC;
@@ -68,10 +66,10 @@ int32_t CMasterCtrl::ProcessInitTopic(TMQHeadInfo *pMQHeadInfo, const struct Msg
 	return 0;
 }
 
-int32_t CMasterCtrl::ProcessMsg(TMQHeadInfo *pMQHeadInfo, const struct Msg &stMsg)
+int32_t CMasterCtrl::ProcessMsg(TMQHeadInfo *pMQHeadInfo, const struct Msg *pstMsg)
 {
-    g_easyMQServer.transferMsg(&stMsg);
-    struct Msg curMsg(stMsg);
+    g_easyMQServer.transferMsg(pstMsg);
+    struct Msg curMsg(*pstMsg);
     curMsg.type = Msg::MSG_TYPE_RESP_INIT_TOPIC;
     curMsg.retCode = Msg::MSG_RET_SUCC;
     SendRsp(pMQHeadInfo, (char *)&curMsg, sizeof(curMsg));
@@ -79,36 +77,30 @@ int32_t CMasterCtrl::ProcessMsg(TMQHeadInfo *pMQHeadInfo, const struct Msg &stMs
 }
 int32_t CMasterCtrl::OnReqMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint32_t iUsrCodeLen)
 {
-	printMem(pUsrCode, iUsrCodeLen);
-	INFO("get message");
-
 	struct Asn20Msg *asnMsg = (struct Asn20Msg *)pUsrCode;
-	struct Msg *pstMsg = (struct Msg *)malloc(iUsrCodeLen);
-	memcpy(pstMsg,&asnMsg->msg,iUsrCodeLen-sizeof(asnMsg->msgTag)-sizeof(asnMsg->msgLen));
-	struct Msg stMsg = *pstMsg;
+	struct Msg *pstMsg = &asnMsg->msg;
 
-	switch(stMsg.type)
+	switch(pstMsg->type)
 	{
 	case Msg::MSG_TYPE_REQ_INIT_TOPIC:
-		ProcessInitTopic(pMQHeadInfo, stMsg);
+		ProcessInitTopic(pMQHeadInfo, pstMsg);
 	    break;
 	case Msg::MSG_TYPE_REQ_SUBSCRIBE:
-	    stMsg.type = Msg::MSG_TYPE_RESP_PUBLISH;
-	    stMsg.retCode = Msg::MSG_RET_SUCC;
+	    pstMsg->type = Msg::MSG_TYPE_RESP_PUBLISH;
+	    pstMsg->retCode = Msg::MSG_RET_SUCC;
 	    break;
 	case Msg::MSG_TYPE_RESP_PUBLISH:
-	    stMsg.type = Msg::MSG_TYPE_RESP_SUBSCRIBE;
-	    stMsg.retCode = Msg::MSG_RET_SUCC;
+	    pstMsg->type = Msg::MSG_TYPE_RESP_SUBSCRIBE;
+	    pstMsg->retCode = Msg::MSG_RET_SUCC;
 	    break;
 	case Msg::MSG_TYPE_REQ_ECHO:
-		stMsg.type = Msg::MSG_TYPE_RESP_ECHO;
-		stMsg.retCode = Msg::MSG_RET_SUCC;
+		pstMsg->type = Msg::MSG_TYPE_RESP_ECHO;
+		pstMsg->retCode = Msg::MSG_RET_SUCC;
 	default:
-	    ERR("Error msg type %d", stMsg.type);
-	    stMsg.retCode = Msg::MSG_RET_FAIL;
+	    ERR("Error msg type %d", pstMsg->type);
+	    pstMsg->retCode = Msg::MSG_RET_FAIL;
 	}
 	//SendRsp(pMQHeadInfo, pUsrCode, iUsrCodeLen);
-	free(pstMsg);
 	return 0;
 }
 
@@ -117,10 +109,8 @@ int32_t CMasterCtrl::OnRspMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint
 	printMem(pUsrCode, iUsrCodeLen);
 
 	struct Asn20Msg *asnMsg = (struct Asn20Msg *)pUsrCode;
-	struct Msg *pstMsg = (struct Msg *)malloc(asnMsg->msgLen);
-	memcpy(pstMsg,&asnMsg->msg,asnMsg->msgLen);
-	struct Msg stMsg = *pstMsg;
-	int32_t retType = stMsg.type;
+	struct Msg *pstMsg = &asnMsg->msg;
+	int32_t retType = pstMsg->type;
 
 	switch(retType)
 	{
@@ -131,9 +121,8 @@ int32_t CMasterCtrl::OnRspMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint
 		ERR("Msg error!");
 		break;
 	default:
-		ERR("Error msg type %d", stMsg.type);
+		ERR("Error msg type %d", pstMsg->type);
 	}
-	free(pstMsg);
 
 	return 0;
 }

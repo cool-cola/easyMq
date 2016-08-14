@@ -13,12 +13,25 @@ namespace EasyMQ
     public:
         uint32_t ipAddr;
         uint32_t port;
+		//set必须要重载这个操作符
+		bool operator<(const EasyMQAgent &agent)const
+		{
+			if(ipAddr < agent.ipAddr)
+			{
+				return true;
+			}
+			else if(ipAddr == agent.ipAddr)
+			{
+				return port < agent.port;
+			}
+			return false;
+		}
     };
 
     class EasyMQServer
     {
         public:
-            int32_t initTopic(const char * topic, const EasyMQAgent &);
+            int32_t initTopic(const std::string & topic, const EasyMQAgent &);
 
             int32_t transferMsg(const struct Msg *pMsg);
         protected:
