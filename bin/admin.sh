@@ -17,6 +17,7 @@ doStart()
 	then
 		echo "./$SCC ../etc/$SCC.cfg"
 		./$SCC ../etc/$SCC.cfg
+		./setlog ./$SCC debug
 		#	./send_restart_msg ${SCC}
 	fi
 
@@ -26,6 +27,7 @@ doStart()
 	then
 		echo "./$MCP ../etc/${MCP}.cfg"
 		./$MCP ../etc/${MCP}.cfg
+		./setlog ./$MCP debug
 		#	./send_restart_msg ${MCP}
 	fi
 
@@ -35,6 +37,7 @@ doStart()
 	then
 		echo "./$CCS ../etc/${CCS}.cfg"
 		./$CCS ../etc/${CCS}.cfg
+		./setlog $CCS debug
 		#	./send_restart_msg ${CCS}
 	fi
 	###############################################################
@@ -62,6 +65,9 @@ doStop()
 	else
 		echo "Nothing stop!"
 	fi
+
+	########## clear shm #######
+	./clearshm.sh 0
 }
 
 doStatus()
@@ -84,5 +90,10 @@ case "$opt" in
 	"status" )
 		doStatus
 		;;
+	"restart" )
+		doStop
+		doStart
+	;;
+	#TODO: other options
 esac
 

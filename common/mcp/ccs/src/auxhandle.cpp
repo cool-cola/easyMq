@@ -7,7 +7,7 @@ CAuxHandle::CAuxHandle()
 	memset(&m_stAllStat,0,sizeof(m_stAllStat));
 	m_unID = 0;
 	m_cAuxID = -1;
-	m_ullMemCost = 0;	
+	m_ullMemCost = 0;
 	m_pCLoadGrid = NULL;
 	m_unTcpClientNum = 0;
 	m_unTcpErrClientNum = 0;
@@ -15,19 +15,19 @@ CAuxHandle::CAuxHandle()
 CAuxHandle::~CAuxHandle()
 {
 	delete m_pCLoadGrid;
-}; 
+};
 int CAuxHandle::Initialize(void* pMainCrtl,char cAuxID)
 {
 	m_pMainCtrl = pMainCrtl;
 	m_cAuxID = cAuxID;
-	
+
 	m_pMainConfig = &(((CMainCtrl*)m_pMainCtrl)->m_stConfig);
 	m_pMe2SvrPipe = ((CMainCtrl*)m_pMainCtrl)->m_Me2SvrPipe.GetCodeQueue((short)m_cAuxID);
 	m_pSvr2MePipe = ((CMainCtrl*)m_pMainCtrl)->m_Svr2MePipe.GetCodeQueue((short)m_cAuxID);
 
 	assert(m_pMe2SvrPipe);
 	assert(m_pSvr2MePipe);
-	
+
 	//log
 	char szTmp[512];
 	sprintf(szTmp,"../log/%s_aux%d", ((CMainCtrl*)m_pMainCtrl)->m_stConfig.m_szSvrName,(int)m_cAuxID);
@@ -37,14 +37,14 @@ int CAuxHandle::Initialize(void* pMainCrtl,char cAuxID)
 	sprintf(szTmp,"../log/%s_stat_aux%d", ((CMainCtrl*)m_pMainCtrl)->m_stConfig.m_szSvrName,(int)m_cAuxID);
 	m_pStatistic = new CStatistic();
 	m_pStatistic->Inittialize(szTmp);
-	
+
 	//初始化socket组
 	m_pSocket = new TSocketNode[m_pMainConfig->MAX_SOCKET_NUM];
 	for(int i = 0; i < m_pMainConfig->MAX_SOCKET_NUM; i++ )
 	{
 		memset(&m_pSocket[i],0,sizeof(TSocketNode));
 		m_pSocket[i].m_iSocket  = -1;
-	}	
+	}
 	m_ullMemCost += (long long)sizeof(TSocketNode)*(long long)m_pMainConfig->MAX_SOCKET_NUM;
 
 	//连接资源限制,root用户下有效
@@ -52,7 +52,7 @@ int CAuxHandle::Initialize(void* pMainCrtl,char cAuxID)
 	rlim.rlim_cur = m_pMainConfig->MAX_SOCKET_NUM+10240;
 	rlim.rlim_max = m_pMainConfig->MAX_SOCKET_NUM+10240;
 	setrlimit(RLIMIT_NOFILE, &rlim);
-	
+
 	//创建管道
 	char *pMem = new char[MAX_MSG_LEN];
 	m_Main2MePipe.AttachMem(0,pMem,MAX_MSG_LEN,CCodeQueue::Init);
@@ -65,16 +65,16 @@ int CAuxHandle::Initialize(void* pMainCrtl,char cAuxID)
 	m_ullMemCost += (long long)iMemSize;
 
 	iMemSize = CBuffMng::CountMemSize(m_pMainConfig->MAX_SOCKET_NUM);
-	pMem = new char[iMemSize];	
+	pMem = new char[iMemSize];
 	m_stBuffMngRecv.AttachMem(pMem,iMemSize,m_pMainConfig->MAX_SOCKET_NUM);
 	m_ullMemCost += (long long)iMemSize;
 
 	if (m_stBuffMngRecv.AttachIdxObjMng(&m_stIdxObjMngRecv))
 	{
 		printf("BuffMngRecv AttachIdxObjMng  failed!\n");
-		return -1;	
+		return -1;
 	}
-	
+
 	//创建SC消息缓冲区
 	iMemSize = TIdxObjMng::CountMemSize(m_pMainConfig->SND_BLOCK_SIZE,m_pMainConfig->SND_BLOCK_NUM,1);
 	pMem = new char[iMemSize];
@@ -83,23 +83,23 @@ int CAuxHandle::Initialize(void* pMainCrtl,char cAuxID)
 	m_ullMemCost += (long long)iMemSize;
 
 	iMemSize = CBuffMng::CountMemSize(m_pMainConfig->MAX_SOCKET_NUM);
-	pMem = new char[iMemSize];	
+	pMem = new char[iMemSize];
 	m_stBuffMngSend.AttachMem(pMem,iMemSize,m_pMainConfig->MAX_SOCKET_NUM);
 	m_ullMemCost += (long long)iMemSize;
 
 	if (m_stBuffMngSend.AttachIdxObjMng(&m_stIdxObjMngSend))
 	{
 		printf("BuffMngRecv AttachIdxObjMng  failed!\n");
-		return -1;	
+		return -1;
 	}
-	
+
 	//初始化端口
 	if (InitSocket())
 	{
 		printf("InitSocket error!\n");
 		return -1;
 	}
-	
+
 	//bind cpu
 	if(m_pMainConfig->m_aiBindCpu[(int)m_cAuxID] >= 0)
 	{
@@ -107,7 +107,7 @@ int CAuxHandle::Initialize(void* pMainCrtl,char cAuxID)
 		int iCpuId = m_pMainConfig->m_aiBindCpu[(int)m_cAuxID];
 		WARN("Aux %d set cpu affinity %d, use CQ %d|%d\n",(int)m_cAuxID,iCpuId,(int)m_pMe2SvrPipe->GetID(),(int)m_pSvr2MePipe->GetID());
 		printf("Aux %d set cpu affinity %d,use CQ %d|%d\n",(int)m_cAuxID,iCpuId,(int)m_pMe2SvrPipe->GetID(),(int)m_pSvr2MePipe->GetID());
-		
+
 		CPU_ZERO(&mask);
 		CPU_SET(iCpuId, &mask);
 		sched_setaffinity(0, sizeof(mask), &mask);
@@ -117,7 +117,7 @@ int CAuxHandle::Initialize(void* pMainCrtl,char cAuxID)
 		m_pMainConfig->m_iLoadCheckAllSpan,
 		m_pMainConfig->m_iLoadCheckEachSpan,
 		m_pMainConfig->m_iLoadCheckMaxPkgNum);
-	
+
 	WARN("Aux %d Init Success! Cost Mem %llu bytes.\n",(int)m_cAuxID,m_ullMemCost);
 	printf("Aux %d Init Success! Cost Mem %llu bytes.\n",(int)m_cAuxID,m_ullMemCost);
 	return 0;
@@ -126,15 +126,15 @@ int CAuxHandle::Initialize(void* pMainCrtl,char cAuxID)
 int CAuxHandle::FillMQHead(int iSuffix,TMQHeadInfo* pMQHeadInfo,
 		unsigned char ucCmd,unsigned char ucDataType/*=TMQHeadInfo::DATA_TYPE_TCP*/)
 {
-	TSocketNode* pSocketNode = &m_pSocket[iSuffix];    
+	TSocketNode* pSocketNode = &m_pSocket[iSuffix];
 	if (pSocketNode->m_iSocket<0)
 		return -1;
-	
+
 	memset(pMQHeadInfo,0,sizeof(TMQHeadInfo));
 	pMQHeadInfo->m_iSuffix = iSuffix;
 	pMQHeadInfo->m_ucCmd = ucCmd;
 	pMQHeadInfo->m_ucDataType = ucDataType;
-	pMQHeadInfo->m_usClientPort = pSocketNode->m_usClientPort;		
+	pMQHeadInfo->m_usClientPort = pSocketNode->m_usClientPort;
 	pMQHeadInfo->m_unClientIP = pSocketNode->m_unClientIP;
 	memcpy(pMQHeadInfo->m_szSrcMQ,CCS_MQ,sizeof(CCS_MQ));
 	pMQHeadInfo->m_usSrcListenPort = pSocketNode->m_usListenPort;
@@ -144,7 +144,7 @@ int CAuxHandle::FillMQHead(int iSuffix,TMQHeadInfo* pMQHeadInfo,
 	pMQHeadInfo->m_tTimeStampuSec = m_tNow.tv_usec;
 
 	//pMQHeadInfo->m_usFromCQID = (unsigned short)m_cAuxID;
-		
+
 	memcpy(pMQHeadInfo->m_szEchoData,&(pSocketNode->m_unID),sizeof(int));
 	return 0;
 }
@@ -162,14 +162,14 @@ int CAuxHandle::CheckTimeOut()
 			{
 				if ((m_pSocket[i].m_iSocket < 0)||(m_pSocket[i].m_sSocketType != TSocketNode::TCP_CLIENT_SOCKET))
 					continue;
-				
+
 				if (tNow - m_pSocket[i].m_iActiveTime > m_pMainConfig->m_iTimeOutSecs)
 				{
 					WARN("iSocketSuffix %d closed. fd %d, timeout\n", i, m_pSocket[i].m_iSocket);
 					ClearSocketNode(i,m_pMainConfig->m_iDisconnectNotify);
 				}
-			}			
-		}	
+			}
+		}
 	}
 
 	return 0;
@@ -211,23 +211,23 @@ int CAuxHandle::ClearSocketNode(int iSocketSuffix,int iCloseNotify/*=0*/)
 {
 	if (iSocketSuffix<0 ||iSocketSuffix>=m_pMainConfig->MAX_SOCKET_NUM)
 		return -1;
-	
-	TSocketNode* pSocketNode = &m_pSocket[iSocketSuffix];    
+
+	TSocketNode* pSocketNode = &m_pSocket[iSocketSuffix];
 	if (pSocketNode->m_iSocket < 0)
 		return -2;
-	
+
 	if(pSocketNode->m_sSocketType == TSocketNode::TCP_CLIENT_SOCKET)
 	{
 		//通知
 		if (iCloseNotify)
 		{
-			TMQHeadInfo stMQHeadInfo;		
+			TMQHeadInfo stMQHeadInfo;
 			FillMQHead(iSocketSuffix,&stMQHeadInfo,TMQHeadInfo::CMD_CCS_NOTIFY_DISCONN);
 			int iRet = m_pMe2SvrPipe->AppendOneCode((const char *)&stMQHeadInfo, sizeof(TMQHeadInfo));
 			if(0 > iRet)
 			{
 				ERR("AppendOneCode to Me2SvrPipe failed! ret=%d, NOTIFY![%s:%d]\n",iRet,__FILE__,__LINE__);
-			}	
+			}
 		}
 		m_unTcpClientNum--;
 
@@ -237,8 +237,8 @@ int CAuxHandle::ClearSocketNode(int iSocketSuffix,int iCloseNotify/*=0*/)
 		pSocketNode->m_iSocket = -1;
 
 		m_stBuffMngRecv.FreeBuffer(iSocketSuffix);
-		m_stBuffMngSend.FreeBuffer(iSocketSuffix);		
-	}	
+		m_stBuffMngSend.FreeBuffer(iSocketSuffix);
+	}
 	return 0;
 }
 int CAuxHandle::DoSvrMessage(char* pMsgBuff,int iCodeLength)
@@ -248,7 +248,7 @@ int CAuxHandle::DoSvrMessage(char* pMsgBuff,int iCodeLength)
 	{
 		ProcessNotifyMsg(pMsgBuff,iCodeLength);
 		return -1;
-	}	
+	}
 
 	char *pClientMsg = pMsgBuff + sizeof(TMQHeadInfo);
 	int iClientMsgLen = iCodeLength - sizeof(TMQHeadInfo);
@@ -261,7 +261,7 @@ int CAuxHandle::DoSvrMessage(char* pMsgBuff,int iCodeLength)
 	{
 		int iQueueWaitus = (m_tNow.tv_sec - pMQHeadInfo->m_tTimeStampSec)*1000000+
 						(m_tNow.tv_usec - pMQHeadInfo->m_tTimeStampuSec);
-		
+
 		if(iQueueWaitus > m_pMainConfig->m_iMaxQueueWaitus)
 		{
 			ERR("Expire Msg From Svr2Me pipe, QueueWait=%dus\n",iQueueWaitus);
@@ -281,7 +281,7 @@ int CAuxHandle::DoSvrMessage(char* pMsgBuff,int iCodeLength)
 		ERR("Bad Suffix %d From Svr2Me pipe,socket invalid.\n",iSocketSuffix);
 		return -1;
 	}
-	
+
 	if(pSocketNode->m_sSocketType == TSocketNode::TCP_CLIENT_SOCKET)
 	{
 		unsigned int unID = *(unsigned int*)(pMQHeadInfo->m_szEchoData);
@@ -296,18 +296,18 @@ int CAuxHandle::DoSvrMessage(char* pMsgBuff,int iCodeLength)
 		{
 			int iSendBytes = send(pSocketNode->m_iSocket,pClientMsg,iClientMsgLen,0);
 			if ((iSendBytes<0)&&(errno!=EAGAIN))
-			{	
+			{
 				WARN("write() to socket error,ret=%d![%s:%d]\n",iSendBytes,__FILE__,__LINE__);
 				return -1;
 			}
 			else if (iSendBytes < iClientMsgLen)
 			{
 				iSendBytes = iSendBytes>0 ? iSendBytes : 0;
-				if (0==m_stBuffMngSend.AppendBuffer(iSocketSuffix, 
+				if (0==m_stBuffMngSend.AppendBuffer(iSocketSuffix,
 								pClientMsg+iSendBytes,iClientMsgLen-iSendBytes))
 				{
 					//增加EPOLLOUT监控
-					m_stEPollFlowUp.Modify(pSocketNode->m_iSocket,iSocketSuffix,EPOLLIN |EPOLLOUT| EPOLLERR|EPOLLHUP);		
+					m_stEPollFlowUp.Modify(pSocketNode->m_iSocket,iSocketSuffix,EPOLLIN |EPOLLOUT| EPOLLERR|EPOLLHUP);
 				}
 				else
 				{
@@ -318,7 +318,7 @@ int CAuxHandle::DoSvrMessage(char* pMsgBuff,int iCodeLength)
 					ClearSocketNode(iSocketSuffix);
 					return -1;
 				}
-			}	
+			}
 		}
 		else
 		{
@@ -328,20 +328,20 @@ int CAuxHandle::DoSvrMessage(char* pMsgBuff,int iCodeLength)
 					iSocketSuffix, pSocketNode->m_iSocket, NIPQUAD(pSocketNode->m_unClientIP),(int)pSocketNode->m_usClientPort,__FILE__,__LINE__);
 
 				//不能秘密丢包,关闭连接,使外界感知
-				ClearSocketNode(iSocketSuffix);					
+				ClearSocketNode(iSocketSuffix);
 				return -1;
-			}				
-		}		
-		pSocketNode->m_iActiveTime = m_tNow.tv_sec;		
+			}
+		}
+		pSocketNode->m_iActiveTime = m_tNow.tv_sec;
 		m_stStat.m_llTcpSCPkgNum++;
-		m_stStat.m_llTcpSCPkgLen += iClientMsgLen;	
+		m_stStat.m_llTcpSCPkgLen += iClientMsgLen;
 
 		m_stAllStat.m_llTcpSCPkgNum++;
-		m_stAllStat.m_llTcpSCPkgLen += iClientMsgLen;	
+		m_stAllStat.m_llTcpSCPkgLen += iClientMsgLen;
 	}
 	else if(pSocketNode->m_sSocketType == TSocketNode::UDP_SOCKET)
 	{
-		struct sockaddr_in addrClient;	
+		struct sockaddr_in addrClient;
 		addrClient.sin_family = AF_INET;
 		addrClient.sin_addr.s_addr = pMQHeadInfo->m_unClientIP;
 		addrClient.sin_port = htons(pMQHeadInfo->m_usClientPort);
@@ -353,23 +353,23 @@ int CAuxHandle::DoSvrMessage(char* pMsgBuff,int iCodeLength)
 		if(iSendBytes > 0)
 		{
 			m_stStat.m_llUdpSCSuccPkgNum++;
-			m_stStat.m_llUdpSCPkgLen += iClientMsgLen;	
+			m_stStat.m_llUdpSCPkgLen += iClientMsgLen;
 
 			m_stAllStat.m_llUdpSCSuccPkgNum++;
-			m_stAllStat.m_llUdpSCPkgLen += iClientMsgLen;		
+			m_stAllStat.m_llUdpSCPkgLen += iClientMsgLen;
 		}
 		else
 		{
 			WARN("Udp sendto failed ret=%d.[%s:%d]\n",iSendBytes,__FILE__,__LINE__);
 			m_stStat.m_llUdpSCFailedPkgNum++;
 			m_stAllStat.m_llUdpSCFailedPkgNum++;
-		}			
+		}
 	}
 	else
 	{
 		ERR("Msg from Svr2Me pipe, can not send data to socket type %d.[%s:%d]\n",(int)pSocketNode->m_sSocketType,__FILE__,__LINE__);
 		return -1;
-	}	
+	}
 
 	return 0;
 }
@@ -380,12 +380,12 @@ int CAuxHandle::CheckClientMessage()
 	while(m_stEPollFlowUp.GetEvents(llKey,unEvents))
 	{
 		int iSocketSuffix = llKey;
-		TSocketNode* pSocketNode = &m_pSocket[iSocketSuffix];  
+		TSocketNode* pSocketNode = &m_pSocket[iSocketSuffix];
 		if (pSocketNode->m_iSocket < 0)
 		{
 			ERR("GetEvents.fd = %d\n",pSocketNode->m_iSocket);
 			continue;
-		}	
+		}
 
 		if (!((EPOLLIN | EPOLLOUT) & unEvents))
 		{
@@ -404,24 +404,24 @@ int CAuxHandle::CheckClientMessage()
 					//清除通知
 					timeval tv;
 					tv.tv_sec=0;
-					tv.tv_usec=0;			
+					tv.tv_usec=0;
 					m_Main2MePipe.WaitData(&tv);
 					CheckMainMessage();
-				}			
+				}
 				else if(pSocketNode->m_iSocket == m_pSvr2MePipe->GetReadNotifyFD())
 				{
 					//清除通知
 					timeval tv;
 					tv.tv_sec=0;
-					tv.tv_usec=0;			
+					tv.tv_usec=0;
 					m_pSvr2MePipe->WaitData(&tv);
 					CheckSvrMessage();
 				}
-			}					
+			}
 			else if (TSocketNode::TCP_CLIENT_SOCKET == pSocketNode->m_sSocketType)
 			{
 				RecvClientData(iSocketSuffix);
-								
+
 			}
 			else if (TSocketNode::UDP_SOCKET == pSocketNode->m_sSocketType)
 			{
@@ -440,13 +440,13 @@ int CAuxHandle::CheckClientMessage()
 					WARN("CheckIPAccess %s return deny!\n",inet_ntoa(addrClient.sin_addr));
 					break;
 				}
-					
+
 				TMQHeadInfo* pMQHeadInfo = (TMQHeadInfo*)m_szBuffRecv;
 				FillMQHead(iSocketSuffix,pMQHeadInfo,
 					TMQHeadInfo::CMD_DATA_TRANS,TMQHeadInfo::DATA_TYPE_UDP);
 				pMQHeadInfo->m_unClientIP = addrClient.sin_addr.s_addr;
 				pMQHeadInfo->m_usClientPort = ntohs(addrClient.sin_port);
-				
+
 				int iRet = m_pMe2SvrPipe->AppendOneCode(
 								(const char *)m_szBuffRecv, iRecvBytes+sizeof(TMQHeadInfo));
 				if(0 > iRet)
@@ -454,19 +454,19 @@ int CAuxHandle::CheckClientMessage()
 					ERR("AppendOneCode() to Me2Svr Pipe failed! ret=%d, UDP![%s:%d]\n", iRet,__FILE__,__LINE__);
 					continue;
 				}
-				
+
 				m_stStat.m_llUdpCSPkgNum++;
-				m_stStat.m_llUdpCSPkgLen += iRecvBytes;	
+				m_stStat.m_llUdpCSPkgLen += iRecvBytes;
 
 				m_stAllStat.m_llUdpCSPkgNum++;
-				m_stAllStat.m_llUdpCSPkgLen += iRecvBytes;	
-			}			
+				m_stAllStat.m_llUdpCSPkgLen += iRecvBytes;
+			}
 			else
 			{
 				ERR("No this socket type %d!\n",(int)pSocketNode->m_sSocketType);
 			}
 		}
-	
+
 		//有输出
 		if (EPOLLOUT & unEvents)
 		{
@@ -477,13 +477,13 @@ int CAuxHandle::CheckClientMessage()
 				ClearSocketNode(iSocketSuffix,m_pMainConfig->m_iDisconnectNotify);
 				ERR("send() to socket error,iSocketSuffix %d fd %d, ret=%d,close link![%s:%d]\n",  iSocketSuffix, pSocketNode->m_iSocket, iSendBytes,__FILE__,__LINE__);
 				return -1;
-			}				
+			}
 
 			//发送完毕,去掉OUT监控
 			if (m_stBuffMngSend.GetBufferSize(iSocketSuffix) <= 0)
 			{
 				m_stEPollFlowUp.Modify(pSocketNode->m_iSocket,iSocketSuffix,EPOLLIN | EPOLLERR|EPOLLHUP);
-			}			
+			}
 		}
 		pSocketNode->m_iActiveTime = m_tNow.tv_sec;
 	}
@@ -504,7 +504,7 @@ int CAuxHandle::CheckMainMessage()
 			m_Main2MePipe.SkipHeadCodePtr();
 			iGetPtrLen = -1;
 		}
-		
+
 		iGetPtrLen = m_Main2MePipe.GetHeadCodePtr(pMsgBuff, &iCodeLength);
 		if(iGetPtrLen < 0)
 		{
@@ -520,7 +520,7 @@ int CAuxHandle::CheckMainMessage()
 		{
 			break;
 		}
-		
+
 		iDoMsgLen += iCodeLength;
 		iDoMsgCnt++;
 
@@ -532,7 +532,7 @@ int CAuxHandle::CheckMainMessage()
 		m_Main2MePipe.SkipHeadCodePtr();
 		iGetPtrLen = -1;
 	}
-		
+
 	return 0;
 }
 
@@ -543,7 +543,7 @@ int CAuxHandle::CheckSvrMessage()
 	int iCodeLength;
 	char* pMsgBuff;
 	int iGetPtrLen = -1;
-	
+
 	while((iDoMsgLen < 500*1024) && (iDoMsgCnt < 500))
 	{
 		if(iGetPtrLen > 0)
@@ -551,7 +551,7 @@ int CAuxHandle::CheckSvrMessage()
 			m_pSvr2MePipe->SkipHeadCodePtr();
 			iGetPtrLen = -1;
 		}
-		
+
 		iGetPtrLen = m_pSvr2MePipe->GetHeadCodePtr(pMsgBuff, &iCodeLength);
 		if(iGetPtrLen < 0)
 		{
@@ -567,10 +567,10 @@ int CAuxHandle::CheckSvrMessage()
 		{
 			break;
 		}
-		
+
 		iDoMsgLen += iCodeLength;
 		iDoMsgCnt++;
-		
+
 		DoSvrMessage(pMsgBuff,iCodeLength);
 	}
 
@@ -579,7 +579,7 @@ int CAuxHandle::CheckSvrMessage()
 		m_pSvr2MePipe->SkipHeadCodePtr();
 		iGetPtrLen = -1;
 	}
-		
+
 	return 0;
 }
 //接收对应socket的数据,return recv len
@@ -587,8 +587,8 @@ int CAuxHandle::RecvClientData(int iSocketSuffix)
 {
 	if (iSocketSuffix<0 ||iSocketSuffix>=m_pMainConfig->MAX_SOCKET_NUM)
 		return -1;
-	
-	TSocketNode* pSocketNode = &m_pSocket[iSocketSuffix];    
+
+	TSocketNode* pSocketNode = &m_pSocket[iSocketSuffix];
 	if (pSocketNode->m_iSocket < 0)
 		return -2;
 
@@ -602,7 +602,7 @@ int CAuxHandle::RecvClientData(int iSocketSuffix)
 		iMsgHeaderLen = ((CMainCtrl*)m_pMainCtrl)->i_default_msg_header_len;
 	}
 	assert(my_net_complete_func);
-	
+
 	int iMissDataLen = 0;
 	int iOldDataSize = m_stBuffMngRecv.GetBufferSize(iSocketSuffix);
 	if(iOldDataSize > 0)
@@ -614,18 +614,18 @@ int CAuxHandle::RecvClientData(int iSocketSuffix)
 			int iPkgTheoryLen = 0;
 			int iMsgLen = my_net_complete_func(m_szBuffRecv,iMsgHeaderLen,iPkgTheoryLen);
 			if (iMsgLen < 0)
-			{	
+			{
 				ERR("iSocketSuffix %d closed. fd %d, my_net_complete_func iMsgLen %d\n", iSocketSuffix, pSocketNode->m_iSocket, iMsgLen);
 				ClearSocketNode(iSocketSuffix,m_pMainConfig->m_iDisconnectNotify);
 				m_unTcpErrClientNum++;
 				return -3;
 			}
 			iMissDataLen = iPkgTheoryLen - iOldDataSize;
-		}	
+		}
 	}
 
 	//预留sizeof(TMQHeadInfo)长度用来构造shm头部
-	int iRecvBytes = read(pSocketNode->m_iSocket, m_szBuffRecv+sizeof(TMQHeadInfo)+iOldDataSize, 
+	int iRecvBytes = read(pSocketNode->m_iSocket, m_szBuffRecv+sizeof(TMQHeadInfo)+iOldDataSize,
 								sizeof(m_szBuffRecv)-sizeof(TMQHeadInfo)-iOldDataSize);
 	if ((iRecvBytes == 0)||((iRecvBytes < 0) && (errno != EAGAIN)))
 	{
@@ -647,19 +647,19 @@ int CAuxHandle::RecvClientData(int iSocketSuffix)
 	{
 		m_stBuffMngRecv.GetBuffer(iSocketSuffix,m_szBuffRecv+sizeof(TMQHeadInfo),iOldDataSize);
 		m_stBuffMngRecv.FreeBuffer(iSocketSuffix);
-		
+
 		pCodeStartPos = m_szBuffRecv+sizeof(TMQHeadInfo);
 		iCodeLeftLen = iRecvBytes+iOldDataSize;
-		
+
 		//判断是否一个完整的包
 		int iMsgLen = 0;
 		int iPkgTheoryLen = 0;
 		while ((iMsgLen=my_net_complete_func(pCodeStartPos,iCodeLeftLen,iPkgTheoryLen)) > 0)
-		{		
+		{
 			if (iPkgTheoryLen < 0 ||iPkgTheoryLen >= MAX_MSG_LEN)
 			{
 				ERR("iSocketSuffix %d closed. fd %d Bad PkgTheoryLen %d ,close link![%s:%d]\n",iSocketSuffix, pSocketNode->m_iSocket,iPkgTheoryLen,__FILE__,__LINE__);
-				ClearSocketNode(iSocketSuffix,m_pMainConfig->m_iDisconnectNotify);				
+				ClearSocketNode(iSocketSuffix,m_pMainConfig->m_iDisconnectNotify);
 				m_unTcpErrClientNum++;
 				return -3;
 			}
@@ -669,9 +669,9 @@ int CAuxHandle::RecvClientData(int iSocketSuffix)
 				if (m_pMainConfig->m_iLoadCheckOpen)
 				{
 					ERR("iSocketSuffix %d closed. fd %d  port %d LoadGrid full!close link!\n",iSocketSuffix, pSocketNode->m_iSocket, (int)pSocketNode->m_usListenPort);
-					ClearSocketNode(iSocketSuffix,m_pMainConfig->m_iDisconnectNotify);					
+					ClearSocketNode(iSocketSuffix,m_pMainConfig->m_iDisconnectNotify);
 					m_unTcpErrClientNum++;
-					return -5;				
+					return -5;
 				}
 			}
 
@@ -684,25 +684,26 @@ int CAuxHandle::RecvClientData(int iSocketSuffix)
 			}
 			else
 			{
+				INFO("Send to mcp %d",iMsgLen + sizeof(TMQHeadInfo));
 				//通知服务器
 				int iRet = m_pMe2SvrPipe->AppendOneCode((const char *)pCodeStartPos-sizeof(TMQHeadInfo),
 									iMsgLen+sizeof(TMQHeadInfo));
 				if(0 > iRet)
-				{		
+				{
 					ERR("AppendOneCode() to Me2Svr Pipe failed!iSocketSuffix %d fd %d ret=%d, close link %d.%d.%d.%d:%d [%s:%d]\n", iSocketSuffix, pSocketNode->m_iSocket, iRet,
 								NIPQUAD(pSocketNode->m_unClientIP),(int)pSocketNode->m_usClientPort,__FILE__,__LINE__);
 
 					//不能秘密丢包,关闭连接,使外界感知
-					ClearSocketNode(iSocketSuffix,m_pMainConfig->m_iDisconnectNotify);	
+					ClearSocketNode(iSocketSuffix,m_pMainConfig->m_iDisconnectNotify);
 					m_unTcpErrClientNum++;
 					return -6;
 				}
 
 				m_stStat.m_llTcpCSPkgNum++;
-				m_stStat.m_llTcpCSPkgLen += iMsgLen;	
+				m_stStat.m_llTcpCSPkgLen += iMsgLen;
 
 				m_stAllStat.m_llTcpCSPkgNum++;
-				m_stAllStat.m_llTcpCSPkgLen += iMsgLen;				
+				m_stAllStat.m_llTcpCSPkgLen += iMsgLen;
 			}
 
 			pCodeStartPos += iMsgLen;
@@ -728,14 +729,14 @@ int CAuxHandle::RecvClientData(int iSocketSuffix)
 			{
 			    for(int i = 0; i < iCodeLeftLen; i++ )
 					sprintf(szTmpBuff+strlen(szTmpBuff),"%02x", (unsigned char)pCodeStartPos[i]);
-				
-			    TLib_Log_LogMsg("%s\n",szTmpBuff);				
+
+			    TLib_Log_LogMsg("%s\n",szTmpBuff);
 			}
 
-			WARN("DUMP:\n");	
+			WARN("DUMP:\n");
 			WARN("iRecvBytes:%d iOldDataSize:%d iMsgHeaderLen:%d iMissDataLen:%d iCodeLeftLen:%d\n",
-				iRecvBytes,iOldDataSize,iMsgHeaderLen,iMissDataLen,iCodeLeftLen);	
-			
+				iRecvBytes,iOldDataSize,iMsgHeaderLen,iMissDataLen,iCodeLeftLen);
+
 			ClearSocketNode(iSocketSuffix,m_pMainConfig->m_iDisconnectNotify);
 			m_unTcpErrClientNum++;
 			return -7;
@@ -743,7 +744,7 @@ int CAuxHandle::RecvClientData(int iSocketSuffix)
 
 		if (iCodeLeftLen <= 0)
 			return 0;
-		
+
 		//残渣数据存入
 		if (0==m_stBuffMngRecv.AppendBuffer(iSocketSuffix,pCodeStartPos,iCodeLeftLen))
 		{
@@ -755,9 +756,9 @@ int CAuxHandle::RecvClientData(int iSocketSuffix)
 			ERR("iSocketSuffix %d fd %d AppendBuffer() failed! BuffMngRecv may be full, close link %d.%d.%d.%d:%d.[%s:%d]\n",
 					iSocketSuffix, pSocketNode->m_iSocket, NIPQUAD(pSocketNode->m_unClientIP),(int)pSocketNode->m_usClientPort,__FILE__,__LINE__);
 
-			ClearSocketNode(iSocketSuffix,m_pMainConfig->m_iDisconnectNotify);	
+			ClearSocketNode(iSocketSuffix,m_pMainConfig->m_iDisconnectNotify);
 			m_unTcpErrClientNum++;
-		}			
+		}
 	}
 	else
 	{
@@ -769,13 +770,13 @@ int CAuxHandle::RecvClientData(int iSocketSuffix)
 		else
 		{
 			ERR("iSocketSuffix %d fd %d AppendBuffer() failed! BuffMngRecv may be full, close link %d.%d.%d.%d:%d.[%s:%d]\n",
-					iSocketSuffix, pSocketNode->m_iSocket, NIPQUAD(pSocketNode->m_unClientIP),(int)pSocketNode->m_usClientPort,__FILE__,__LINE__);	
-			
-			ClearSocketNode(iSocketSuffix,m_pMainConfig->m_iDisconnectNotify);			
+					iSocketSuffix, pSocketNode->m_iSocket, NIPQUAD(pSocketNode->m_unClientIP),(int)pSocketNode->m_usClientPort,__FILE__,__LINE__);
+
+			ClearSocketNode(iSocketSuffix,m_pMainConfig->m_iDisconnectNotify);
 			m_unTcpErrClientNum++;
 		}
 	}
-	
+
 	return -8;
 }
 
@@ -795,7 +796,7 @@ int CAuxHandle::InitSocket()
 		printf("add MQ_PIPE_SOCKET to socket array failed!\n");
 		ERR("add MQ_PIPE_SOCKET to socket array failed!\n");
 		return -3;
-	}	
+	}
 
 
 	//shm管道监听机制
@@ -806,7 +807,7 @@ int CAuxHandle::InitSocket()
 		printf("add MQ_PIPE_SOCKET to socket array failed!\n");
 		ERR("add MQ_PIPE_SOCKET to socket array failed!\n");
 		return -3;
-	}	
+	}
 
 	return 0;
 }
@@ -827,18 +828,18 @@ int CAuxHandle::Run()
 
 		//每次循环取一次
 		gettimeofday(&m_tNow,NULL);
-		
+
 		//读取客户端包
-		CheckClientMessage();    
+		CheckClientMessage();
 
 		//读取主线程包
-		CheckMainMessage(); 
-		
+		CheckMainMessage();
+
 		//读取服务器端包
-		CheckSvrMessage(); 
+		CheckSvrMessage();
 
 		//检测通讯超时
-		CheckTimeOut();    
+		CheckTimeOut();
 	}
 	m_bHandleRun = false;
 	return 0;
@@ -848,7 +849,7 @@ int CAuxHandle::LogInit(char *sLogBaseName, long lMaxLogSize, int iMaxLogNum)
 	sprintf(m_szLogFileBase,"%s",sLogBaseName);
 	sprintf(m_szLogFileName,"%s.log",sLogBaseName);
 	m_iMaxLogSize = lMaxLogSize;
-	m_iMaxLogNum = iMaxLogNum;	
+	m_iMaxLogNum = iMaxLogNum;
 	return 0;
 };
 
@@ -859,12 +860,12 @@ void CAuxHandle::Log(int iKey,int iLevel,const char *sFormat, ...)
 	{
 		iWriteLog = 1;
 	}
-	
-	//本次级别大于要求的级别   
+
+	//本次级别大于要求的级别
 	if (iLevel <= ((CMainCtrl*)m_pMainCtrl)->m_stConfig.m_pShmLog->m_iLogLevel)
 	{
 		iWriteLog = 1;
-	}	
+	}
 
 	if (!iWriteLog)
 		return;
@@ -889,7 +890,7 @@ void CAuxHandle::Log(int iKey,int iLevel,const char *sFormat, ...)
 			break;
 		default:
 			len += snprintf(buf, sizeof(buf) - 1, "[UNKOWN%d]", iLevel);
-			break;				
+			break;
 	}
 	va_list ap;
 	va_start(ap, sFormat);
@@ -925,12 +926,12 @@ void CAuxHandle::frequency_log(int iKey,int iLevel,const char *sFormat, ...)
 	if (now - last >= 5)
 	{
 		last = now;
-		frq = 0;	
+		frq = 0;
 	}
 	if (frq > 10)
 		return;
 	frq++;
-	
+
 	char buf[1024];
 	int len = 0;
 	switch(iLevel)
@@ -952,8 +953,8 @@ void CAuxHandle::frequency_log(int iKey,int iLevel,const char *sFormat, ...)
 			break;
 		default:
 			len += snprintf(buf, sizeof(buf) - 1, "[UNKOWN%d]", iLevel);
-			break;				
-	}	
+			break;
+	}
 	va_list ap;
 	va_start(ap, sFormat);
 	len += vsnprintf(buf+len, sizeof(buf)-len - 1, sFormat, ap);
@@ -977,7 +978,7 @@ int CAuxHandle::ProcessNotifyMsg(char* pCodeBuff,int iCodeLen)
 			return -1;
 
 		int iListenPort = pMQHeadInfo->m_usSrcListenPort;
-				
+
 		int iNewSuffix = CreateSocketNode(iSocket,TSocketNode::TCP_CLIENT_SOCKET,
 									pMQHeadInfo->m_unClientIP,pMQHeadInfo->m_usClientPort,iListenPort);
 		if(iNewSuffix < 0)
@@ -994,7 +995,7 @@ int CAuxHandle::ProcessNotifyMsg(char* pCodeBuff,int iCodeLen)
 		int iNewSuffix = CreateSocketNode(iSocket,TSocketNode::UDP_SOCKET,0,0,iListenPort);
 		if(iNewSuffix < 0)
 			return -2;
-	}	
+	}
 	else if(pMQHeadInfo->m_ucCmd == TMQHeadInfo::CMD_CCS_NOTIFY_DISCONN)
 	{
 		TSocketNode* pSocketNode = &m_pSocket[pMQHeadInfo->m_iSuffix];
@@ -1003,29 +1004,29 @@ int CAuxHandle::ProcessNotifyMsg(char* pCodeBuff,int iCodeLen)
 
 		if(pSocketNode->m_sSocketType == TSocketNode::TCP_CLIENT_SOCKET)
 		{
-			if((pSocketNode->m_unClientIP != pMQHeadInfo->m_unClientIP) || 
+			if((pSocketNode->m_unClientIP != pMQHeadInfo->m_unClientIP) ||
 				(pSocketNode->m_usClientPort != pMQHeadInfo->m_usClientPort))
 			{
-				return -2;	
-			}				
+				return -2;
+			}
 			char szIpClient[32];
-			HtoP(pSocketNode->m_unClientIP, szIpClient);	
+			HtoP(pSocketNode->m_unClientIP, szIpClient);
 			WARN("iSocketSuffix %d fd %d CMD_CCS_NOTIFY_DISCONN %s:%d.[%s:%d]\n",
 					pMQHeadInfo->m_iSuffix, pSocketNode->m_iSocket, szIpClient,(int)pSocketNode->m_usClientPort,__FILE__,__LINE__);
-			ClearSocketNode(pMQHeadInfo->m_iSuffix);	
+			ClearSocketNode(pMQHeadInfo->m_iSuffix);
 		}
 	}
-	else if (TMQHeadInfo::CMD_CCS_MCP_NOTIFY_DISCONN == pMQHeadInfo->m_ucCmd) {		
+	else if (TMQHeadInfo::CMD_CCS_MCP_NOTIFY_DISCONN == pMQHeadInfo->m_ucCmd) {
 		TSocketNode* pSocketNode = &m_pSocket[pMQHeadInfo->m_iSuffix];
 		char szIpCmd[32];
-		HtoP(ntohl(pMQHeadInfo->m_unClientIP), szIpCmd);		
+		HtoP(ntohl(pMQHeadInfo->m_unClientIP), szIpCmd);
 		ERR("iSocketSuffix %d fd %d CMD_CCS_MCP_NOTIFY_DISCONN close port %d %s:%d.[%s:%d]\n",
 					(int)pMQHeadInfo->m_iSuffix, (int)pSocketNode->m_iSocket, (int)pMQHeadInfo->m_usClosePort,
 					szIpCmd,(int)pMQHeadInfo->m_usClientPort,__FILE__,__LINE__);
 		pMQHeadInfo->m_ucCmd = TMQHeadInfo::CMD_CCS_THREAD_NOTIFY_DISCONN;
 		NotifyAllThread(pCodeBuff, iCodeLen);
 	}
-	else if (TMQHeadInfo::CMD_CCS_THREAD_NOTIFY_DISCONN == pMQHeadInfo->m_ucCmd) {		
+	else if (TMQHeadInfo::CMD_CCS_THREAD_NOTIFY_DISCONN == pMQHeadInfo->m_ucCmd) {
 		for (int i=0; i<m_pMainConfig->MAX_SOCKET_NUM; ++i) {
 			TSocketNode* pSocketNode = &m_pSocket[i];
 			if (pSocketNode->m_usListenPort == pMQHeadInfo->m_usClosePort) {
@@ -1035,7 +1036,7 @@ int CAuxHandle::ProcessNotifyMsg(char* pCodeBuff,int iCodeLen)
 				ERR("iSocketSuffix %d fd %d CMD_CCS_THREAD_NOTIFY_DISCONN cmd[%s:%d] close port %d client [%s:%d].[%s:%d]\n",
 					i, (int)pSocketNode->m_iSocket, szIpCmd,(int)pMQHeadInfo->m_usClientPort, (int)pMQHeadInfo->m_usClosePort,
 					szIpClient,(int)pSocketNode->m_usClientPort,__FILE__,__LINE__);
-				ClearSocketNode(i);	
+				ClearSocketNode(i);
 			}
 		}
 	}
@@ -1043,7 +1044,7 @@ int CAuxHandle::ProcessNotifyMsg(char* pCodeBuff,int iCodeLen)
 }
 /*
 * 2013-03-14
-* patxiao 
+* patxiao
 * send msg to all thread
 */
 int CAuxHandle::NotifyAllThread(char* pCodeBuff,int iCodeLen)
@@ -1054,7 +1055,7 @@ int CAuxHandle::NotifyAllThread(char* pCodeBuff,int iCodeLen)
 		iRet = ((CMainCtrl*)m_pMainCtrl)->m_pAuxHandle[i]->GetCodeQueue()->AppendOneCode(pCodeBuff, iCodeLen);
 		if (iRet < 0) {
 			ERR("AppendOneCode to Aux %d failed, ret %d[%s:%d]\n",
-				i, iRet, __FILE__,__LINE__);				
+				i, iRet, __FILE__,__LINE__);
 		}
 	}
 	return 0;
@@ -1063,7 +1064,7 @@ int CAuxHandle::NotifyAllThread(char* pCodeBuff,int iCodeLen)
 //实行管理和实时状态查询
 int CAuxHandle::ProcessAdminMsg(int iSocketSuffix,char *pMsg,int iMsgLen)
 {
-	TSocketNode* pSocketNode = &m_pSocket[iSocketSuffix];  
+	TSocketNode* pSocketNode = &m_pSocket[iSocketSuffix];
 
 	int iOutLen;
 	int iRet = m_pMainConfig->m_admin_msg_func((void*)m_pMainCtrl,pMsg,iMsgLen,m_szBuffSend,iOutLen);
@@ -1074,12 +1075,12 @@ int CAuxHandle::ProcessAdminMsg(int iSocketSuffix,char *pMsg,int iMsgLen)
 	}
 	char *pClientMsg = m_szBuffSend;
 	int iClientMsgLen = iOutLen;
-	
+
 	if (m_stBuffMngSend.GetBufferSize(iSocketSuffix) <= 0)
 	{
 		int iSendBytes = send(pSocketNode->m_iSocket,pClientMsg,iClientMsgLen,0);
 		if ((iSendBytes<0)&&(errno!=EAGAIN))
-		{		
+		{
 			WARN("write() to socket error,ret=%d![%s:%d]\n",iSendBytes,__FILE__,__LINE__);
 			m_unTcpErrClientNum++;
 			return -1;
@@ -1087,11 +1088,11 @@ int CAuxHandle::ProcessAdminMsg(int iSocketSuffix,char *pMsg,int iMsgLen)
 		else if (iSendBytes < iClientMsgLen)
 		{
 			iSendBytes = iSendBytes>0 ? iSendBytes : 0;
-			if (0==m_stBuffMngSend.AppendBuffer(iSocketSuffix, 
+			if (0==m_stBuffMngSend.AppendBuffer(iSocketSuffix,
 							pClientMsg+iSendBytes,iClientMsgLen-iSendBytes))
 			{
 				//增加EPOLLOUT监控
-				m_stEPollFlowUp.Modify(pSocketNode->m_iSocket,iSocketSuffix,EPOLLIN |EPOLLOUT| EPOLLERR|EPOLLHUP);		
+				m_stEPollFlowUp.Modify(pSocketNode->m_iSocket,iSocketSuffix,EPOLLIN |EPOLLOUT| EPOLLERR|EPOLLHUP);
 			}
 			else
 			{
@@ -1103,7 +1104,7 @@ int CAuxHandle::ProcessAdminMsg(int iSocketSuffix,char *pMsg,int iMsgLen)
 				m_unTcpErrClientNum++;
 				return -1;
 			}
-		}	
+		}
 	}
 	else
 	{
@@ -1113,10 +1114,10 @@ int CAuxHandle::ProcessAdminMsg(int iSocketSuffix,char *pMsg,int iMsgLen)
 				iSocketSuffix, pSocketNode->m_iSocket, NIPQUAD(pSocketNode->m_unClientIP),(int)pSocketNode->m_usClientPort,__FILE__,__LINE__);
 
 			//不能秘密丢包,关闭连接,使外界感知
-			ClearSocketNode(iSocketSuffix);	
+			ClearSocketNode(iSocketSuffix);
 			m_unTcpErrClientNum++;
 			return -1;
-		}				
-	}		
+		}
+	}
 	return 0;
 }

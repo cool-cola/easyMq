@@ -12,12 +12,7 @@
 #include <stdint.h>
 namespace EasyMQ
 {
-    struct Asn20Msg
-    {
-        uint32_t msgTag;
-        uint32_t msgLen; //实际的长度，不包含包头的长度
-        char cBuf[0];
-    };
+	struct Asn20Msg ;
 
     struct Msg
     {
@@ -46,18 +41,17 @@ namespace EasyMQ
         MsgRet retCode;
         uint32_t uBufLen;//最后cBuf的大小
         char cBuf[0];
+		int32_t getLen()
+		{
+			return sizeof(type) + sizeof(retCode) + sizeof(uBufLen) + uBufLen;
+		}
+	};
 
-        void toAsn(struct Asn20Msg &stAsnMsg)
-        {
-        	//计算变长结构体数组的大小
-            stAsnMsg.msgLen = sizeof(type) + sizeof(retCode) + sizeof(uBufLen) + uBufLen;
-            memcpy(stAsnMsg.cBuf, (char *)this, stAsnMsg.msgLen);
-        }
-
-        void fromAsn(const struct Asn20Msg &stAsnMsg)
-        {
-            memcpy((char *)this, stAsnMsg.cBuf, stAsnMsg.msgLen);
-        }
+	struct Asn20Msg
+    {
+        uint32_t msgTag;
+        uint32_t msgLen; //实际的长度，不包含包头的长度
+		struct Msg msg;
     };
 }
 

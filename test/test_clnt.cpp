@@ -3,7 +3,7 @@ Copyright (C), 1988-1999
 Author:nekeyzhong
 Version :1.0
 Date: 2010
-Description: 
+Description:
 ***********************************************************/
 
 #include <assert.h>
@@ -11,6 +11,8 @@ Description:
 #include <string.h>
 #include <sys/time.h>
 #include <stdlib.h>
+#include "../common/easyMsg.h"
+
 TcpCltSocket stTcpCltSocket;
 timeval t1,t2;
 char DestIp[16];
@@ -92,7 +94,21 @@ int32_t testInitTopic(char *pTopic)
 {
 	int32_t iRet = 0;
 	char buf[MAX_LENGTH] = {0};
-	iRet = sendMsg(pTopic, strlen(pTopic));
+	int32_t iMsgLen = sizeof(EasyMQ::Msg)+strlen(pTopic);
+	EasyMQ::Msg *msg = (EasyMQ::Msg *)malloc(iMsgLen);
+	msg->type = EasyMQ::Msg::MSG_TYPE_REQ_INIT_TOPIC;
+	msg->uBufLen = strlen(pTopic);
+	memcpy(msg->cBuf,pTopic,strlen(pTopic));
+	PrintBin((char *)msg,iMsgLen);
+
+	int32_t iAsnMsgLen = sizeof(EasyMQ::Asn20Msg)-sizeof(EasyMQ::Msg)+iMsgLen;
+	EasyMQ::Asn20Msg *asnMsg = (EasyMQ::Asn20Msg *)malloc(iAsnMsgLen);
+	//asnMsg->msgTag =0x4E534153;
+	asnMsg->msgTag =0x5341534E;
+	asnMsg->msgLen = htonl(iAsnMsgLen);
+	memcpy(&asnMsg->msg,msg,iMsgLen);
+	PrintBin((char *)asnMsg,iAsnMsgLen);
+	iRet = sendMsg((char *)asnMsg,iAsnMsgLen);
 	if(iRet != 0)
 	{
 	    return iRet;
@@ -127,27 +143,12 @@ int32_t testRecvMsgSpeed()
 	return 0;
 }
 
-int32_t sendMsg(char *buf, int32_t iLen)
+int32_t sendMsg(char *buf,int32_t iMsgLen)
 {
-	//按照asn2.0的编码要求
-	/*  0x4E534153 len
-	 *  content
-	 */
-	char bufSend[2048];
-	memset(bufSend, 0, sizeof(bufSend));
-	//设置消息头
-	*(int *)bufSend = 0x4E534153;
-	int iSendLen = 8+iLen;
-
-	//设置消息体
-	*((int *)(bufSend + 4)) = iSendLen;
-	sprintf(bufSend+8,"%s",buf);
-
-
 	printf("SEND=>>\n");
-	PrintBin(bufSend,iSendLen);
+	PrintBin(buf,iMsgLen);
 	gettimeofday(&t1,NULL);
-	stTcpCltSocket.TcpWrite(bufSend,iSendLen);
+	stTcpCltSocket.TcpWrite(buf,iMsgLen);
 	return 0;
 }
 

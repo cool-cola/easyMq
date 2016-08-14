@@ -55,12 +55,16 @@ int32_t CMasterCtrl::ProcessInitTopic(TMQHeadInfo *pMQHeadInfo, const struct Msg
     EasyMQAgent agent;
     agent.ipAddr = pMQHeadInfo->m_unClientIP;
     agent.port = pMQHeadInfo->m_usClientPort;
-    std::string topic(stMsg.cBuf);
-    g_easyMQServer.initTopic(topic,agent);
+	char buf[1024];
+	memcpy(buf,stMsg.cBuf,stMsg.uBufLen);
+	buf[stMsg.uBufLen] = '\0';
+    g_easyMQServer.initTopic(buf,agent);
     struct Msg curMsg(stMsg);
+	char sendBuf[1024];
     curMsg.type = Msg::MSG_TYPE_RESP_INIT_TOPIC;
     curMsg.retCode = Msg::MSG_RET_SUCC;
-    SendRsp(pMQHeadInfo, (char *)&curMsg, sizeof(curMsg));
+	memcpy(sendBuf+sizeof(TMQHeadInfo),&curMsg,sizeof(curMsg));
+    SendRsp(pMQHeadInfo, sendBuf+sizeof(TMQHeadInfo), sizeof(curMsg));
 	return 0;
 }
 
@@ -76,10 +80,12 @@ int32_t CMasterCtrl::ProcessMsg(TMQHeadInfo *pMQHeadInfo, const struct Msg &stMs
 int32_t CMasterCtrl::OnReqMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint32_t iUsrCodeLen)
 {
 	printMem(pUsrCode, iUsrCodeLen);
+	INFO("get message");
 
 	struct Asn20Msg *asnMsg = (struct Asn20Msg *)pUsrCode;
-	struct Msg stMsg;
-	stMsg.fromAsn(*asnMsg);
+	struct Msg *pstMsg = (struct Msg *)malloc(iUsrCodeLen);
+	memcpy(pstMsg,&asnMsg->msg,iUsrCodeLen-sizeof(asnMsg->msgTag)-sizeof(asnMsg->msgLen));
+	struct Msg stMsg = *pstMsg;
 
 	switch(stMsg.type)
 	{
@@ -101,7 +107,8 @@ int32_t CMasterCtrl::OnReqMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint
 	    ERR("Error msg type %d", stMsg.type);
 	    stMsg.retCode = Msg::MSG_RET_FAIL;
 	}
-	SendRsp(pMQHeadInfo, pUsrCode, iUsrCodeLen);
+	//SendRsp(pMQHeadInfo, pUsrCode, iUsrCodeLen);
+	free(pstMsg);
 	return 0;
 }
 
@@ -110,8 +117,9 @@ int32_t CMasterCtrl::OnRspMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint
 	printMem(pUsrCode, iUsrCodeLen);
 
 	struct Asn20Msg *asnMsg = (struct Asn20Msg *)pUsrCode;
-	struct Msg stMsg;
-	stMsg.fromAsn(*asnMsg);
+	struct Msg *pstMsg = (struct Msg *)malloc(asnMsg->msgLen);
+	memcpy(pstMsg,&asnMsg->msg,asnMsg->msgLen);
+	struct Msg stMsg = *pstMsg;
 	int32_t retType = stMsg.type;
 
 	switch(retType)
@@ -125,6 +133,7 @@ int32_t CMasterCtrl::OnRspMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint
 	default:
 		ERR("Error msg type %d", stMsg.type);
 	}
+	free(pstMsg);
 
 	return 0;
 }

@@ -14,14 +14,16 @@ std::map<std::string, std::set<EasyMQAgent> > g_mapTopicToAgent;
 
 extern CMasterCtrl g_tMasterCtrl;
 EasyMQServer g_easyMQServer;
-int32_t EasyMQServer::initTopic(const std::string &topic, const EasyMQAgent &agent)
+int32_t EasyMQServer::initTopic(const char *topic, const EasyMQAgent &agent)
 {
+	INFO("receive msg %s from ip %d port %d",topic,agent.ipAddr,agent.port);
     std::set<EasyMQAgent> setAgent;
     std::map<std::string, std::set<EasyMQAgent> >::iterator it = g_mapTopicToAgent.find(topic);
     if(it == g_mapTopicToAgent.end())
     {
         //setAgent.insert(agent);
-        g_mapTopicToAgent[topic] = setAgent;
+		std::string strTopic(topic);
+        g_mapTopicToAgent[strTopic] = setAgent;
     }
     else
     {

@@ -26,20 +26,20 @@ int main( int argc, char **argv )
 		printf("%s  [config] -d\n", argv[0]);
 		exit(0);
 	}
-	
+
 	char *pCfgFile = argv[1];
 	if(0!=access(pCfgFile,R_OK))
 	{
 		printf("%s does not exist!\n",pCfgFile);
 		exit(0);
 	}
-	
+
 	if(!((argc >= 3)&&(strcmp(argv[2],"-d")==0)))
 	{
 		//后台进程
 		InitDaemon();
-	}	
-	
+	}
+
 	//文件锁
 	int lock_fd = open(pCfgFile, O_RDWR|O_CREAT, 0640);
 	if(lock_fd < 0 )
@@ -54,16 +54,16 @@ int main( int argc, char **argv )
 		printf("Lock File Failed,  Server is already Running!\n");
 		return -1;
 	}
-	
+
 	//reload signal
 	signal(SIGUSR1, sigusr1_handle);
 	//stop signal
-	signal(SIGUSR2, sigusr2_handle);	
+	signal(SIGUSR2, sigusr2_handle);
 
 	char szTmp[128];
 	char szProcName[128];
 	GetNameFromPath(argv[0],szProcName);
-	
+
 	sprintf(szTmp,"../log/%s",szProcName);
 	TLib_Log_LogInit(szTmp, 0x10000000, 5);
 //	signal(SIGSEGV, sigsegv_handle);
@@ -73,17 +73,19 @@ int main( int argc, char **argv )
 	ret = g_pFrameCtrl->Initialize(szProcName,pCfgFile);
 	if( 0 != ret )
 	{
+		printf("frame ctrl Initialize failed\n");
 		exit(0);
 	}
 
 	TLib_Log_LogMsg("Start services ......\n");
-	
+
 	g_pFrameCtrl->Run();
 
 	delete g_pFrameCtrl;
 
 	flock(lock_fd, LOCK_UN);
-	
+	TLib_Log_LogMsg("End services ......\n");
+
 	return 0;
 }
 
@@ -107,19 +109,19 @@ void sigsegv_handle (int sig)
     	int nSize = 0;
     	char ** symbols = NULL;
     	int i = 0;
-	
+
  	if (!first)
 	{
 	 	 first++;//�����ֹ����Ĵ����ٴη������������ѭ��
-	  
+
 		TLib_Log_LogMsg("segv memory error.\n");
 	  	nSize = backtrace(array, 25);
 	  	symbols = backtrace_symbols(array, nSize);
 	  	for (i = 0; i < nSize; i++)
-	  	{   
+	  	{
 			TLib_Log_LogMsg("stack %d: %s\n", i, symbols[i]);
-		} 
-		
+		}
+
 	  	free(symbols);
 	}
 	exit( 1);
@@ -127,7 +129,7 @@ void sigsegv_handle (int sig)
 int InitDaemon()
 {
 	pid_t pid;
-	
+
 	// 1.ת��Ϊ��̨����
 	if ((pid = fork() ) != 0 )
 		exit( 0);
@@ -153,15 +155,15 @@ int InitDaemon()
 
 	// 5.�ı䵱ǰ�Ĺ���Ŀ¼������ж�ز����ļ�ϵͳ
 	//if (chdir("/") == -1) exit(1);
- 
+
 	// 6.�����ļ����룬��ֹĳЩ���Ա�����������
 	umask(0);
 	setpgrp();
 
 	// 7.�ض����׼���룬���������������Ϊ�ػ�����û�п����ն�
 	/*
-	if ((fd = open("/dev/null", O_RDWR)) == -1) 
-		exit(1); 
+	if ((fd = open("/dev/null", O_RDWR)) == -1)
+		exit(1);
 
 	dup2(fd, STDIN_FILENO);
 	dup2(fd, STDOUT_FILENO);
@@ -185,7 +187,7 @@ int InitDaemon()
 	sig.sa_flags = 0;
 	sigemptyset( &sig.sa_mask);
 	sigaction( SIGHUP,&sig,NULL);
-	
+
 	return 0;
 }
 

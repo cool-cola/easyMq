@@ -58,7 +58,6 @@ void CFrameCtrl::Ver(FILE *pFileFp)
 
 int32_t CFrameCtrl::Initialize(char *pProName, char *pConfigFile)
 {
-    //������
     strcpy(m_stConfig.m_szSvrName, pProName);
     LoadMcpIdx();
     if (ReadCfgFile(pConfigFile))
@@ -82,7 +81,6 @@ int32_t CFrameCtrl::Initialize(char *pProName, char *pConfigFile)
         return -1;
     }
 
-    // ��mcp0��ʱ��ʼ��
     if (m_iMcpIdx != 0)
     {
         sleep(2);
@@ -202,7 +200,6 @@ int32_t CFrameCtrl::LogInit()
         memset((char *)m_stConfig.m_pShmLog, 0, sizeof(TShmLog));
         m_stConfig.m_pShmLog->m_iLogLevel = RUNLOG;
     }
-	i-3
     sprintf(m_stConfig.m_szLogFileBase, "../log/%s", m_stConfig.m_szSvrName);
 
     TLib_Log_LogInit(m_stConfig.m_szLogFileBase, m_stConfig.m_iMaxLogSize, m_stConfig.m_iMaxLogNum);
@@ -406,11 +403,11 @@ int32_t CFrameCtrl::WaitData()
     {
         if (ccsToMeFd == llKey	|| sccToMeFd == llKey)
         {
-            //���֪ͨ
             if (EPOLLIN == unEvents)
             {
                 read((int32_t)llKey, szTempBuf, sizeof(szTempBuf));
             }
+			INFO("ccsToMeFd %ld, sccToMeFd %ld, llkey %ld",ccsToMeFd,sccToMeFd,llKey);
         }
     }
 
@@ -422,7 +419,6 @@ int32_t CFrameCtrl::TimeTick()
     gettimeofday(&m_tNow, NULL);
 
 	g_tMasterCtrl.TimeTick(&m_tNow);
-    //дͳ��
     WriteStat();
     return 0;
 }
