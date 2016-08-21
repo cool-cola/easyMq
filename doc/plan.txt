@@ -1,6 +1,16 @@
 1. 实现消息订阅
+
+consumerA -> topicA
+consumerB -> topicB
+
 2. 实现消息转发
+
+producerA -> topicA -> consumerA
+
 3. 实现消息多发
+
+producerA -> topicA -> consumerA1
+					-> consumerA2
 
 
 存在问题

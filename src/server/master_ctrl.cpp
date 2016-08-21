@@ -57,12 +57,12 @@ int32_t CMasterCtrl::ProcessInitTopic(TMQHeadInfo *pMQHeadInfo, const struct Msg
     agent.port = pMQHeadInfo->m_usClientPort;
 	std::string topic(pstMsg->cBuf,pstMsg->uBufLen);
     g_easyMQServer.initTopic(topic,agent);
-    struct Msg curMsg(*pstMsg);
-	char sendBuf[1024];
-    curMsg.type = Msg::MSG_TYPE_RESP_INIT_TOPIC;
-    curMsg.retCode = Msg::MSG_RET_SUCC;
-	memcpy(sendBuf+sizeof(TMQHeadInfo),&curMsg,sizeof(curMsg));
-    SendRsp(pMQHeadInfo, sendBuf+sizeof(TMQHeadInfo), sizeof(curMsg));
+
+	//保证请求的报文比响应的长，这样不会发生溢出，否则要重新分配内存，增加内存拷贝
+    struct Msg *curMsg = (struct Msg*) pstMsg;
+    curMsg->type = Msg::MSG_TYPE_RESP_INIT_TOPIC;
+    curMsg->retCode = Msg::MSG_RET_SUCC;
+    SendRsp(pMQHeadInfo, (char *)curMsg, sizeof(struct Msg));
 	return 0;
 }
 
