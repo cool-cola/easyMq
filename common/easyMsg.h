@@ -39,18 +39,20 @@ namespace EasyMQ
 
         MsgType type;
         MsgRet retCode;
+		uint32_t srcIP; //源ip地址,订阅时传递，后面可以转发消息
+		short srcPort; //源port
         uint32_t uBufLen;//最后cBuf的大小
         char cBuf[0];
-		int32_t getLen()
-		{
-			return sizeof(type) + sizeof(retCode) + sizeof(uBufLen) + uBufLen;
-		}
 	};
 
 	struct Asn20Msg
     {
+		uint32_t len()
+		{
+			return sizeof(Asn20Msg)-sizeof(Msg)+msg.uBufLen;
+		}
         uint32_t msgTag;
-        uint32_t msgLen; //实际的长度，不包含包头的长度
+        uint32_t msgLen; //包含包头等所有的长度
 		struct Msg msg;
     };
 }

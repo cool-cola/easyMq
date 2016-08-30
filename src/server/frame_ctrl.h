@@ -3,7 +3,6 @@ Copyright (C), 2012-2099
 Author:lambygao
 Version :1.0
 Date: 2014-07
-Description: ��Ϣ�������
 ***********************************************************/
 #ifndef _DEFIEN_FRAME_CTRL_HEADER_
 #define _DEFIEN_FRAME_CTRL_HEADER_
@@ -45,22 +44,18 @@ typedef struct
 
 typedef struct
 {
-	//����
 	char m_szSvrName[256];
 	char m_szCfgFileName[256];
 	int32_t m_iBindCpu;
 
-	//ͨ�Źܵ�
 	char m_szSCCToMeMQ[256];
 	char m_szMeToSCCMQ[256];
 
 	char m_szCCSToMeMQ[256];
 	char m_szMeToCCSMQ[256];
 
-	// ����
 	char m_szCtrlConf[256];
 
-	//��־
 	TShmLog* m_pShmLog;
 	int32_t m_iStatTimeGap;
 	int32_t m_iMaxLogSize;
@@ -100,9 +95,7 @@ public:
 
 	char* GetSendBuff()	{	return (m_pSendBuffer==NULL)?NULL:(m_pSendBuffer+sizeof(TMQHeadInfo));	}
 
-	// SendReq�����ڷ���GetSendBuff��õ�BUFF
-	int32_t SendReq(uint32_t uIp, uint32_t uPort, char* pReq, uint32_t reqLen);
-	// SendRsp�����ڷ���GetSendBuff��õ�BUFF
+	int32_t SendReq(TMQHeadInfo* pMQHeadInfo, char* pReq, uint32_t reqLen);
 	int32_t SendRsp(TMQHeadInfo* pMQHeadInfo, char* pRsp, uint32_t rspLen);
 
 private:

@@ -58,11 +58,6 @@ int32_t CMasterCtrl::ProcessInitTopic(TMQHeadInfo *pMQHeadInfo, const struct Msg
 	std::string topic(pstMsg->cBuf,pstMsg->uBufLen);
     g_easyMQServer.initTopic(topic,agent);
 
-	//保证请求的报文比响应的长，这样不会发生溢出，否则要重新分配内存，增加内存拷贝
-    struct Msg *curMsg = (struct Msg*) pstMsg;
-    curMsg->type = Msg::MSG_TYPE_RESP_INIT_TOPIC;
-    curMsg->retCode = Msg::MSG_RET_SUCC;
-    SendRsp(pMQHeadInfo, (char *)curMsg, sizeof(struct Msg));
 	return 0;
 }
 
@@ -70,7 +65,7 @@ int32_t CMasterCtrl::ProcessMsg(TMQHeadInfo *pMQHeadInfo, const struct Msg *pstM
 {
     g_easyMQServer.transferMsg(pstMsg);
     struct Msg curMsg(*pstMsg);
-    curMsg.type = Msg::MSG_TYPE_RESP_INIT_TOPIC;
+    curMsg.type = Msg::MSG_TYPE_RESP_PUBLISH;
     curMsg.retCode = Msg::MSG_RET_SUCC;
     SendRsp(pMQHeadInfo, (char *)&curMsg, sizeof(curMsg));
 	return 0;
@@ -100,7 +95,14 @@ int32_t CMasterCtrl::OnReqMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint
 	    ERR("Error msg type %d", pstMsg->type);
 	    pstMsg->retCode = Msg::MSG_RET_FAIL;
 	}
-	//SendRsp(pMQHeadInfo, pUsrCode, iUsrCodeLen);
+
+	//保证请求的报文比响应的长，这样不会发生溢出，否则要重新分配内存，增加内存拷贝
+    struct Msg *curMsg = (struct Msg*) pstMsg;
+    curMsg->type = Msg::MSG_TYPE_RESP_INIT_TOPIC;
+    curMsg->retCode = Msg::MSG_RET_SUCC;
+
+	asnMsg->msgLen = htonl(asnMsg->len());
+    SendRsp(pMQHeadInfo, pUsrCode, iUsrCodeLen);
 	return 0;
 }
 
@@ -130,7 +132,7 @@ int32_t CMasterCtrl::OnRspMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint
 //pMsg不包含Header
 int32_t CMasterCtrl::SendReq(uint32_t uIp, uint32_t uPort, char *pMsg, uint32_t uLen)
 {
-    g_pFrameCtrl->SendReq(uIp,uPort,pMsg,uLen);
+    //g_pFrameCtrl->SendReq(uIp,uPort,pMsg,uLen);
 	return 0;
 }
 

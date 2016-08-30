@@ -188,6 +188,7 @@ int main(int argc, char* argv[])
 	init();
 	iRet = testInitTopic("yafngzh");
 	assert(!iRet);
+	sleep(3);
 	return 0;
 
 }

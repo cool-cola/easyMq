@@ -202,7 +202,7 @@ int32_t CFrameCtrl::LogInit()
     if (bNewCreate)
     {
         memset((char *)m_stConfig.m_pShmLog, 0, sizeof(TShmLog));
-        m_stConfig.m_pShmLog->m_iLogLevel = RUNLOG;
+        m_stConfig.m_pShmLog->m_iLogLevel = DEBUGLOG;
     }
 
     sprintf(m_stConfig.m_szLogFileBase, "../log/%s", m_stConfig.m_szSvrName);
@@ -535,14 +535,10 @@ int32_t CFrameCtrl::Run()
     return 0;
 }
 
-int32_t CFrameCtrl::SendReq(uint32_t uIp, uint32_t uPort, char *pReq, uint32_t reqLen)
+//pReq/reqLen 不包含Header
+int32_t CFrameCtrl::SendReq(TMQHeadInfo *pstMQHeadInfo, char *pReq, uint32_t reqLen)
 {
-    TMQHeadInfo *pstMQHeadInfo = (TMQHeadInfo *)(pReq - sizeof(TMQHeadInfo));
-    INIT_MQHEAD(pstMQHeadInfo);
-
     pstMQHeadInfo->m_ucCmd = TMQHeadInfo::CMD_DATA_TRANS;
-    pstMQHeadInfo->m_unClientIP = htonl(uIp);
-    pstMQHeadInfo->m_usClientPort = uPort;
     pstMQHeadInfo->m_ucDataType = TMQHeadInfo::DATA_TYPE_TCP;
 
     memcpy(pstMQHeadInfo->m_szDstMQ, SCC_MQ, sizeof(SCC_MQ));
@@ -558,15 +554,15 @@ int32_t CFrameCtrl::SendRsp(TMQHeadInfo *pMQHeadInfo, char *pRsp, uint32_t rspLe
 
 	if(pRsp != NULL && 0 != rspLen)
 	{
-		rspMQHead = (TMQHeadInfo *)(pRsp - sizeof(TMQHeadInfo));
+		rspMQHead = pMQHeadInfo;
 	}
 	else
 	{
+		assert(0); //不允许走到这个分支，此处可能有bug
 		rspMQHead = (TMQHeadInfo *)m_pSendBuffer;
 		pMQHeadInfo->m_ucCmd = TMQHeadInfo::CMD_CCS_NOTIFY_DISCONN;
 	}
 
-	memcpy(rspMQHead, pMQHeadInfo, sizeof(TMQHeadInfo));
 	rspMQHead->m_tTimeStampSec = m_tNow.tv_sec;
 	rspMQHead->m_tTimeStampuSec = m_tNow.tv_usec;
 

@@ -20,3 +20,8 @@ producerA -> topicA -> consumerA1
 4. core文件不能每次覆盖
 5. admin.sh 对其他选项 没有错误打印
 6. mcp发送消息时，多了一次copy
+7. *ctrllog是做什么用的
+
+
+困难
+1. consumer既需要是client，也需要是server

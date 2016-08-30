@@ -57,7 +57,7 @@ int32_t EasyMQServer::transferMsg(const Msg *pMsg)
 int32_t EasyMQServer::sendMsgToAgent(const Msg *pMsg, const EasyMQAgent &agent)
 {
     //INFO("Send msg to agent!");
-	return g_tMasterCtrl.SendReq(agent.ipAddr, agent.port, (char *)pMsg, sizeof(*pMsg));
+	//return g_tMasterCtrl.SendRsp(agent.ipAddr, agent.port, (char *)pMsg, sizeof(*pMsg));
 }
 
 

@@ -101,7 +101,7 @@ public:
 	char* GetSendBuff()	{	return (m_pSendBuffer==NULL)?NULL:(m_pSendBuffer+sizeof(TMQHeadInfo));	}
 
 	// SendReq�����ڷ���GetSendBuff��õ�BUFF
-	int32_t SendReq(uint32_t uIp, uint32_t uPort, char* pReq, uint32_t reqLen);
+	int32_t SendReq(TMQHeadInfo* pMQHeadInfo, char* pReq, uint32_t reqLen);
 	// SendRsp�����ڷ���GetSendBuff��õ�BUFF
 	int32_t SendRsp(TMQHeadInfo* pMQHeadInfo, char* pRsp, uint32_t rspLen);
 

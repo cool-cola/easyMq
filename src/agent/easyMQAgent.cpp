@@ -7,10 +7,9 @@
 //using namespace EasyMQ;
 
 #include "easyMQAgent.h"
-int32_t EasyMQAgent::initTopic(const std::string &topic)
-{
-	return 0;
-}
+#include "agent_ctrl.h"
+
+extern CAgentCtrl g_tAgentCtrl;
 
 int32_t EasyMQAgent::recvMsg(struct ::EasyMQ::Msg &msg)
 {

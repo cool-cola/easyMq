@@ -47,7 +47,7 @@ public:
 	int32_t OnReqMessage(TMQHeadInfo* pMQHeadInfo, char* pUsrCode, uint32_t iUsrCodeLen);
 	int32_t OnRspMessage(TMQHeadInfo* pMQHeadInfo, char* pUsrCode, uint32_t iUsrCodeLen);
 
-	int32_t SendReq(uint32_t uIp, uint32_t uPort, char* ptReqMsg, uint32_t iLen);
+	int32_t SendReq(TMQHeadInfo *pMQHeadInfo, char* ptReqMsg, uint32_t iLen);
 	int32_t SendRsp(TMQHeadInfo* pMQHeadInfo, char *pOut, uint32_t iLen);
 	int32_t RecvMsg(const struct ::EasyMQ::Msg *);
 private:
