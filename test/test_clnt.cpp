@@ -13,6 +13,7 @@ Description:
 #include <stdlib.h>
 #include "../common/easyMsg.h"
 #include <thread>
+#include <time.h>
 
 TcpCltSocket stTcpCltSocket;
 timeval t1,t2;
@@ -30,6 +31,7 @@ int32_t sendMsg(char *buf, int32_t iLen);
 int32_t recvMsg(char *buf, int32_t iLen);
 
 
+const char *topic = "yafngzh";
 void PrintBin(char *pBuffer, int iLength )
 {
 	int i;
@@ -107,7 +109,9 @@ int32_t testInitTopic(char *pTopic)
 	assert(!iRet);
 	iRet = recvMsg(buf, MAX_LENGTH);
 	assert(!iRet);
+	//printf("receive msg len %d bytes\n",asnMsg->msgLen);
 	freeAsn20Msg(asnMsg);
+	printf("订阅topic %s成功!",pTopic);
 	return iRet;
 }
 
@@ -115,10 +119,19 @@ int32_t testTransferMsg()
 {
 	int32_t iRet = 0;
 	char buf[MAX_LENGTH] = {0};
-	while(1)
+	auto f=[&]
 	{
-		recvMsg(buf,MAX_LENGTH);
-	}
+		while(1)
+		{
+			iRet = recvMsg(buf,MAX_LENGTH);
+			assert(!iRet);
+			Asn20Msg *pAsnMsg = (Asn20Msg *)buf;
+			printf("收到订阅的消息 %s\n",pAsnMsg->msg.cBuf);
+		}
+
+	};
+	std::thread t(f);
+	t.detach();
 	return iRet;
 }
 
@@ -146,14 +159,27 @@ int32_t testPublish(char *msg)
 {
 	char buf[MAX_LENGTH] = {0};
 	int32_t iRet;
-	Asn20Msg *asnMsg = getAsn20Msg("hello");
-	assert(asnMsg!=NULL);
-	asnMsg->msg.type = Msg::MSG_TYPE_REQ_PUBLISH;
-	iRet = sendMsg((char *)asnMsg,asnMsg->len());
-	assert(!iRet);
-	iRet = recvMsg(buf,sizeof(buf));
-	assert(!iRet);
-	freeAsn20Msg(asnMsg);
+	auto f=[&]
+	{
+		while(1)
+		{
+			int t = (int)time(NULL);
+			snprintf(buf,MAX_LENGTH,"%s_%d",msg,t);
+			Asn20Msg *asnMsg = getAsn20Msg(buf);
+			assert(asnMsg!=NULL);
+			asnMsg->msg.type = Msg::MSG_TYPE_REQ_PUBLISH;
+			strncpy(asnMsg->msg.topic,topic,strlen(topic)+1);
+			iRet = sendMsg((char *)asnMsg,asnMsg->len());
+			assert(!iRet);
+			printf("生产消息 %s\n",buf);
+			iRet = recvMsg(buf,asnMsg->len());
+			assert(!iRet);
+			freeAsn20Msg(asnMsg);
+			sleep(1);
+		}
+	};
+	std::thread t(f);
+	t.detach();
 	return 0;
 }
 int32_t sendMsg(char *buf,int32_t iMsgLen)
@@ -169,7 +195,7 @@ int32_t recvMsg(char *buf, int32_t iLen)
 {
 	printf("\n\nRECV=>>\n");
 	char szIn[65535];
-	int iReadLen = stTcpCltSocket.TcpRead(szIn, sizeof(szIn));
+	int iReadLen = stTcpCltSocket.TcpRead(szIn, sizeof(szIn),100000000);
 	if (iReadLen<=0)
 	{
 		printf("read from %s:%d failed!\n",DestIp,iDestPort);
@@ -199,13 +225,21 @@ int main(int argc, char* argv[])
 {
 	int32_t iRet = 0;
 	init();
+	//订阅
 	iRet = testInitTopic("yafngzh");
 	assert(!iRet);
 
-	std::thread t(testTransferMsg);
-	t.join();
-	return 0;
+	//等待收消息
+	iRet = testTransferMsg();
+	assert(!iRet);
 
+	//发布消息
+	iRet = testPublish("hello");
+	assert(!iRet);
+
+	pause();
+
+	return 0;
 }
 
 

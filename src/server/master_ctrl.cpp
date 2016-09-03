@@ -24,6 +24,18 @@ void printMem(char *pMem, int len)
     }
 }
 
+void printMap()
+{
+	for(auto &p:g_mapTopicToAgent)
+	{
+		printf("topic %s\n",p.first.c_str());
+		for(auto &q:p.second)
+		{
+			printf("agent ip %d port %d suffix %d\n",q.ipAddr,q.port,q.socketSuffix);
+		}
+		printf("\n\n");
+	}
+}
 CMasterCtrl::CMasterCtrl()
 {
 }
@@ -69,24 +81,38 @@ int32_t CMasterCtrl::ProcessMsg(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint32
 	Msg *pMsg = &pAsn20Msg->msg;
 
 	Asn20Msg asnResp;
-	asnResp.msgLen = htonl(asnResp.len());
+	asnResp.msgLen = (asnResp.len());
     asnResp.msg.type= Msg::MSG_TYPE_RESP_PUBLISH;
     asnResp.msg.retCode = Msg::MSG_RET_SUCC;
+	INFO("要发布的 topic %s, 消息 %s",pMsg->topic,pMsg->cBuf);
     SendRsp(pMQHeadInfo, (char *)&asnResp, sizeof(asnResp));
 
-	std::map<std::string, std::set<EasyMQAgent> >::iterator it = g_mapTopicToAgent.find(std::string(pMsg->topic));
+	printMap();
+	auto it = g_mapTopicToAgent.find(std::string(pMsg->topic));
+	/*
 	if(it == g_mapTopicToAgent.end())
 	{
+		INFO("没有topic %s的订阅者",pMsg->topic);
 		return -1;
 	}
-
-	for(std::set<EasyMQAgent>::iterator itr(it->second.begin()); itr != it->second.end();
-				++itr)
+	*/
+	std::string topic(pMsg->topic);
+	for(auto &p:g_mapTopicToAgent)
 	{
-		INFO("发送msg到 socketSuffix %d",pMQHeadInfo->m_iSuffix);
-		pMQHeadInfo->m_iSuffix = itr->socketSuffix;
-		SendRsp(pMQHeadInfo,(char *)pUsrCode,iUsrCodeLen);
+		INFO("map content %s, topic %s",p.first.c_str(),topic.c_str());
+		if(strcmp(p.first.c_str(),topic.c_str())==0)
+		{
+			INFO("equal");
+			for(auto &q : p.second)
+			{
+				INFO("发送msg到 socketSuffix %d",q.socketSuffix);
+				pMQHeadInfo->m_iSuffix = q.socketSuffix;
+				SendRsp(pMQHeadInfo,(char *)pUsrCode,iUsrCodeLen);
+			}
+		}
 	}
+
+
 	return 0;
 }
 int32_t CMasterCtrl::OnReqMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint32_t iUsrCodeLen)
@@ -94,30 +120,30 @@ int32_t CMasterCtrl::OnReqMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint
 	struct Asn20Msg *asnMsg = (struct Asn20Msg *)pUsrCode;
 	struct Msg *pstMsg = &asnMsg->msg;
 
+	//保证请求的报文比响应的长，这样不会发生溢出，否则要重新分配内存，增加内存拷贝
 	switch(pstMsg->type)
 	{
 	case Msg::MSG_TYPE_REQ_INIT_TOPIC:
+		pstMsg->type = Msg::MSG_TYPE_RESP_INIT_TOPIC;
+	    pstMsg->retCode = Msg::MSG_RET_SUCC;
 		ProcessInitTopic(pMQHeadInfo, pstMsg);
-	    break;
-	case Msg::MSG_TYPE_REQ_SUBSCRIBE:
+		asnMsg->msgLen = asnMsg->len();
+		SendRsp(pMQHeadInfo, pUsrCode, iUsrCodeLen);
+		break;
+	case Msg::MSG_TYPE_REQ_PUBLISH:
 	    pstMsg->type = Msg::MSG_TYPE_RESP_PUBLISH;
 	    pstMsg->retCode = Msg::MSG_RET_SUCC;
-	    break;
-	case Msg::MSG_TYPE_REQ_PUBLISH:
-	    pstMsg->type = Msg::MSG_TYPE_RESP_SUBSCRIBE;
-	    pstMsg->retCode = Msg::MSG_RET_SUCC;
+		ProcessMsg(pMQHeadInfo,pUsrCode,iUsrCodeLen);
 	    break;
 	case Msg::MSG_TYPE_REQ_ECHO:
 		pstMsg->type = Msg::MSG_TYPE_RESP_ECHO;
 		pstMsg->retCode = Msg::MSG_RET_SUCC;
+		break;
 	default:
 	    ERR("Error msg type %d", pstMsg->type);
 	    pstMsg->retCode = Msg::MSG_RET_FAIL;
 	}
 
-	//保证请求的报文比响应的长，这样不会发生溢出，否则要重新分配内存，增加内存拷贝
-	asnMsg->msgLen = htonl(asnMsg->len());
-    SendRsp(pMQHeadInfo, pUsrCode, iUsrCodeLen);
 	return 0;
 }
 

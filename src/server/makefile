@@ -1,4 +1,4 @@
-OPT = -g -Wall -Wno-deprecated -Wno-non-template-friend
+OPT = -g -Wall -Wno-deprecated -Wno-non-template-friend -std=c++11
 CXX = g++ $(OPT)
 CC= gcc $(OPT)
 

@@ -253,7 +253,6 @@ void CFrameCtrl::Log(int32_t iKey, int32_t iLevel, const char *sFormat, ...)
     va_start(ap, sFormat);
     len += vsnprintf(buf + len, sizeof(buf) - len - 1, sFormat, ap);
     va_end(ap);
-    //���û���Ի��н�����׷��һ������
     if (len > 0 && buf[len - 1] != '\n')
     {
         strcat(buf, "\n");

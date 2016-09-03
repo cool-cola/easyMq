@@ -1,1 +1,0 @@
-cp -u -r ~/work/prj/easyMq ~/prj/

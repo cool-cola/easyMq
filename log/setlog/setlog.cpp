@@ -18,7 +18,7 @@
 #include <sys/ipc.h>
 #include <errno.h>
 
-typedef struct  
+typedef struct
 {
 	int m_iLogLevel;
 	int m_iLogKey;
@@ -84,10 +84,10 @@ char* CreateShareMem( const char * szFile, char byProjID, int iSize)
 
 //日志级别
 enum emHandleLogLevel
-{	   
+{
 	KEYLOG = -1,
-	NOLOG = 0, 
-	ERRORLOG,	
+	NOLOG = 0,
+	ERRORLOG,
 	RUNLOG,
 	DEBUGLOG
 };
@@ -98,7 +98,7 @@ void ShowUsage(TShmLog* pShmLog)
 	{
 		case KEYLOG:
 			 printf("Log key %d\n",pShmLog->m_iLogKey);
-			 break;	
+			 break;
 		case NOLOG:
 			 printf("Log off\n");
 			 break;
@@ -113,9 +113,9 @@ void ShowUsage(TShmLog* pShmLog)
 			 break;
 		default:
 			  printf("Bad Log level value %d\n",pShmLog->m_iLogLevel);
-			 break;						 
-	};	
-	
+			 break;
+	};
+
 	return;
 }
 int main(int argc, char **argv)
@@ -126,18 +126,18 @@ int main(int argc, char **argv)
 		printf("usage:setlog [procname] -key [key]\n");
 		return 0;
 	}
-	
+
 	char *pProName = argv[1];
 	char szTmpStr[256];
 	sprintf(szTmpStr,"./.%s_ctrllog",pProName);
-	
+
 	if (0 != access(szTmpStr,F_OK))
 	{
 		sprintf(szTmpStr,"touch ./.%s_ctrllog",pProName);
 		system(szTmpStr);
 	}
 	sprintf(szTmpStr,"./.%s_ctrllog",pProName);
-	   
+
 	TShmLog* pShmLog = (TShmLog*)CreateShareMem(szTmpStr, 'L', sizeof(TShmLog));
 	if( !pShmLog )
 	{
@@ -151,6 +151,24 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
+	printf("Current log level: ");
+	switch(pShmLog->m_iLogLevel)
+	{
+		case NOLOG:
+			printf("Log off\n");
+			break;
+		case RUNLOG:
+			printf("Log run\n");
+			break;
+		case ERRORLOG:
+			printf("Log error\n");
+			break;
+		case DEBUGLOG:
+			printf("Log debug\n");
+			break;
+	}
+
+	printf("After change, ");
 	if (0 == strcasecmp(argv[2],"off"))
 	{
 		pShmLog->m_iLogLevel= NOLOG;
@@ -160,17 +178,17 @@ int main(int argc, char **argv)
 	{
 		pShmLog->m_iLogLevel = RUNLOG;
 		printf("Log run\n");
-	}	
+	}
 	else if (0 == strcmp(argv[2],"error"))
 	{
 		pShmLog->m_iLogLevel = ERRORLOG;
 		printf("Log error\n");
-	}	
+	}
 	else if (0 == strcmp(argv[2],"debug"))
 	{
 		pShmLog->m_iLogLevel = DEBUGLOG;
 		printf("Log debug\n");
-	}		
+	}
 	else if (0 == strcmp(argv[2],"-key") || 0 == strcmp(argv[2],"-k"))
 	{
 		if (argc < 4)
@@ -181,13 +199,13 @@ int main(int argc, char **argv)
 		pShmLog->m_iLogLevel = KEYLOG;
 		pShmLog->m_iLogKey= atoi(argv[3]);
 		printf("Log Key %d\n",pShmLog->m_iLogKey);
-	}		
+	}
 	else
 	{
 		ShowUsage(pShmLog);
 		return 0;
 	}
-	
+
 	shmdt( (char*)pShmLog );          //      禁止本进程使用这块内存
 	return 0;
 }

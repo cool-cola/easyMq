@@ -18,18 +18,18 @@ int32_t EasyMQServer::initTopic(const string &topic, const EasyMQAgent &agent)
 {
 	INFO("receive msg %s from ip %d port %d socketSuffix %d",topic.c_str(),agent.ipAddr,agent.port,agent.socketSuffix);
     std::set<EasyMQAgent> setAgent;
-    std::map<std::string, std::set<EasyMQAgent> >::iterator it = g_mapTopicToAgent.find(topic);
+    auto it = g_mapTopicToAgent.find(topic);
     if(it == g_mapTopicToAgent.end())
     {
-		INFO("First initialize the topic, insert directly");
 		setAgent.insert(agent);
         g_mapTopicToAgent[topic] = setAgent;
+		INFO("First initialize the topic, insert directly,插入后map的大小 %d",g_mapTopicToAgent.size());
     }
     else
     {
 		if(it->second.end() == it->second.find(agent))
 		{
-			INFO("Not find agent,now insert");
+			INFO("Not find agent,now insert,插入后的大小 %d",it->second.size());
 			it->second.insert(agent);
 		}
     }
