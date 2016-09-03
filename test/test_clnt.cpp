@@ -12,6 +12,7 @@ Description:
 #include <sys/time.h>
 #include <stdlib.h>
 #include "../common/easyMsg.h"
+#include <thread>
 
 TcpCltSocket stTcpCltSocket;
 timeval t1,t2;
@@ -23,9 +24,11 @@ printf("%s [data]\n",argv[0]);\
 }
 
 #define MAX_LENGTH 2048
+using namespace EasyMQ;
 
 int32_t sendMsg(char *buf, int32_t iLen);
 int32_t recvMsg(char *buf, int32_t iLen);
+
 
 void PrintBin(char *pBuffer, int iLength )
 {
@@ -94,32 +97,28 @@ int32_t testInitTopic(char *pTopic)
 {
 	int32_t iRet = 0;
 	char buf[MAX_LENGTH] = {0};
-	int32_t iMsgLen = sizeof(EasyMQ::Msg)+strlen(pTopic);
-	EasyMQ::Msg *msg = (EasyMQ::Msg *)malloc(iMsgLen);
-	msg->type = EasyMQ::Msg::MSG_TYPE_REQ_INIT_TOPIC;
-	msg->uBufLen = strlen(pTopic);
-	memcpy(msg->cBuf,pTopic,strlen(pTopic));
-	PrintBin((char *)msg,iMsgLen);
-
-	int32_t iAsnMsgLen = sizeof(EasyMQ::Asn20Msg)-sizeof(EasyMQ::Msg)+iMsgLen;
-	EasyMQ::Asn20Msg *asnMsg = (EasyMQ::Asn20Msg *)malloc(iAsnMsgLen);
-	//asnMsg->msgTag =0x4E534153;
-	asnMsg->msgTag =0x5341534E;
-	asnMsg->msgLen = htonl(iAsnMsgLen);
-	memcpy(&asnMsg->msg,msg,iMsgLen);
-	PrintBin((char *)asnMsg,iAsnMsgLen);
-	iRet = sendMsg((char *)asnMsg,iAsnMsgLen);
-	if(iRet != 0)
+	EasyMQ::Asn20Msg *asnMsg = getAsn20Msg(pTopic);
+	if(asnMsg==	NULL)
 	{
-	    return iRet;
+		return -1;
 	}
+	asnMsg->msg.type = Msg::MSG_TYPE_REQ_INIT_TOPIC;
+	iRet = sendMsg((char *)asnMsg,asnMsg->len());
+	assert(!iRet);
 	iRet = recvMsg(buf, MAX_LENGTH);
+	assert(!iRet);
+	freeAsn20Msg(asnMsg);
 	return iRet;
 }
 
 int32_t testTransferMsg()
 {
 	int32_t iRet = 0;
+	char buf[MAX_LENGTH] = {0};
+	while(1)
+	{
+		recvMsg(buf,MAX_LENGTH);
+	}
 	return iRet;
 }
 
@@ -143,6 +142,20 @@ int32_t testRecvMsgSpeed()
 	return 0;
 }
 
+int32_t testPublish(char *msg)
+{
+	char buf[MAX_LENGTH] = {0};
+	int32_t iRet;
+	Asn20Msg *asnMsg = getAsn20Msg("hello");
+	assert(asnMsg!=NULL);
+	asnMsg->msg.type = Msg::MSG_TYPE_REQ_PUBLISH;
+	iRet = sendMsg((char *)asnMsg,asnMsg->len());
+	assert(!iRet);
+	iRet = recvMsg(buf,sizeof(buf));
+	assert(!iRet);
+	freeAsn20Msg(asnMsg);
+	return 0;
+}
 int32_t sendMsg(char *buf,int32_t iMsgLen)
 {
 	printf("SEND=>>\n");
@@ -188,7 +201,9 @@ int main(int argc, char* argv[])
 	init();
 	iRet = testInitTopic("yafngzh");
 	assert(!iRet);
-	sleep(3);
+
+	std::thread t(testTransferMsg);
+	t.join();
 	return 0;
 
 }

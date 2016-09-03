@@ -21,6 +21,7 @@ producerA -> topicA -> consumerA1
 5. admin.sh 对其他选项 没有错误打印
 6. mcp发送消息时，多了一次copy
 7. *ctrllog是做什么用的
+8. 如何把gcc报错的日志，打印更美观？
 
 
 困难

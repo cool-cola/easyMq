@@ -6,6 +6,8 @@
  */
 #include "easyMsg.h"
 #include <string>
+#include <map>
+#include <set>
 namespace EasyMQ
 {
     class EasyMQAgent
@@ -13,6 +15,7 @@ namespace EasyMQ
     public:
         uint32_t ipAddr;
         uint32_t port;
+		int32_t socketSuffix;
 		//set必须要重载这个操作符
 		bool operator<(const EasyMQAgent &agent)const
 		{
@@ -43,4 +46,5 @@ namespace EasyMQ
 }
 
 
+extern std::map<std::string, std::set<EasyMQ::EasyMQAgent> > g_mapTopicToAgent;
 

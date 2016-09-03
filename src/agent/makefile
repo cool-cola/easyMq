@@ -24,7 +24,8 @@ COMMON_OBJ = frame_svrd.o frame_ctrl.o \
 	$(PUBLIC)CodeQueueMutil.o \
 	$(PUBLIC)EpollFlow.o \
 	$(PUBLIC)Statistic.o \
-	../../common/comm_mysql/comm_mysql.o
+	../../common/comm_mysql/comm_mysql.o \
+	../../common/easyMsg.o
 
 OBJS = $(COMMON_OBJ) \
 	agent_ctrl.o \

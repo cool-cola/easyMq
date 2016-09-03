@@ -7,6 +7,7 @@ CMasterCtrl g_tMasterCtrl;
 extern EasyMQServer g_easyMQServer;
 /////////////////////////////////////////////////////////////////////////////////////
 
+using namespace EasyMQ;
 void printMem(char *pMem, int len)
 {
     for(int i = 0; i < len; ++i)
@@ -55,19 +56,37 @@ int32_t CMasterCtrl::ProcessInitTopic(TMQHeadInfo *pMQHeadInfo, const struct Msg
     EasyMQAgent agent;
     agent.ipAddr = pMQHeadInfo->m_unClientIP;
     agent.port = pMQHeadInfo->m_usClientPort;
+	agent.socketSuffix = pMQHeadInfo->m_iSuffix;
 	std::string topic(pstMsg->cBuf,pstMsg->uBufLen);
     g_easyMQServer.initTopic(topic,agent);
 
 	return 0;
 }
 
-int32_t CMasterCtrl::ProcessMsg(TMQHeadInfo *pMQHeadInfo, const struct Msg *pstMsg)
+int32_t CMasterCtrl::ProcessMsg(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint32_t iUsrCodeLen)
 {
-    g_easyMQServer.transferMsg(pstMsg);
-    struct Msg curMsg(*pstMsg);
-    curMsg.type = Msg::MSG_TYPE_RESP_PUBLISH;
-    curMsg.retCode = Msg::MSG_RET_SUCC;
-    SendRsp(pMQHeadInfo, (char *)&curMsg, sizeof(curMsg));
+	Asn20Msg *pAsn20Msg = (EasyMQ::Asn20Msg *)pUsrCode;
+	Msg *pMsg = &pAsn20Msg->msg;
+
+	Asn20Msg asnResp;
+	asnResp.msgLen = htonl(asnResp.len());
+    asnResp.msg.type= Msg::MSG_TYPE_RESP_PUBLISH;
+    asnResp.msg.retCode = Msg::MSG_RET_SUCC;
+    SendRsp(pMQHeadInfo, (char *)&asnResp, sizeof(asnResp));
+
+	std::map<std::string, std::set<EasyMQAgent> >::iterator it = g_mapTopicToAgent.find(std::string(pMsg->topic));
+	if(it == g_mapTopicToAgent.end())
+	{
+		return -1;
+	}
+
+	for(std::set<EasyMQAgent>::iterator itr(it->second.begin()); itr != it->second.end();
+				++itr)
+	{
+		INFO("发送msg到 socketSuffix %d",pMQHeadInfo->m_iSuffix);
+		pMQHeadInfo->m_iSuffix = itr->socketSuffix;
+		SendRsp(pMQHeadInfo,(char *)pUsrCode,iUsrCodeLen);
+	}
 	return 0;
 }
 int32_t CMasterCtrl::OnReqMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint32_t iUsrCodeLen)
@@ -84,7 +103,7 @@ int32_t CMasterCtrl::OnReqMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint
 	    pstMsg->type = Msg::MSG_TYPE_RESP_PUBLISH;
 	    pstMsg->retCode = Msg::MSG_RET_SUCC;
 	    break;
-	case Msg::MSG_TYPE_RESP_PUBLISH:
+	case Msg::MSG_TYPE_REQ_PUBLISH:
 	    pstMsg->type = Msg::MSG_TYPE_RESP_SUBSCRIBE;
 	    pstMsg->retCode = Msg::MSG_RET_SUCC;
 	    break;
@@ -97,10 +116,6 @@ int32_t CMasterCtrl::OnReqMessage(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint
 	}
 
 	//保证请求的报文比响应的长，这样不会发生溢出，否则要重新分配内存，增加内存拷贝
-    struct Msg *curMsg = (struct Msg*) pstMsg;
-    curMsg->type = Msg::MSG_TYPE_RESP_INIT_TOPIC;
-    curMsg->retCode = Msg::MSG_RET_SUCC;
-
 	asnMsg->msgLen = htonl(asnMsg->len());
     SendRsp(pMQHeadInfo, pUsrCode, iUsrCodeLen);
 	return 0;

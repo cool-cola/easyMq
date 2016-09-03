@@ -16,7 +16,7 @@ extern CMasterCtrl g_tMasterCtrl;
 EasyMQServer g_easyMQServer;
 int32_t EasyMQServer::initTopic(const string &topic, const EasyMQAgent &agent)
 {
-	INFO("receive msg %s from ip %d port %d",topic.c_str(),agent.ipAddr,agent.port);
+	INFO("receive msg %s from ip %d port %d socketSuffix %d",topic.c_str(),agent.ipAddr,agent.port,agent.socketSuffix);
     std::set<EasyMQAgent> setAgent;
     std::map<std::string, std::set<EasyMQAgent> >::iterator it = g_mapTopicToAgent.find(topic);
     if(it == g_mapTopicToAgent.end())
@@ -39,7 +39,7 @@ int32_t EasyMQServer::initTopic(const string &topic, const EasyMQAgent &agent)
 
 int32_t EasyMQServer::transferMsg(const Msg *pMsg)
 {
-	std::map<std::string, std::set<EasyMQAgent> >::iterator it = g_mapTopicToAgent.find(std::string(pMsg->cBuf));
+	std::map<std::string, std::set<EasyMQAgent> >::iterator it = g_mapTopicToAgent.find(std::string(pMsg->topic));
     if(it == g_mapTopicToAgent.end())
     {
         return -1;
@@ -56,7 +56,7 @@ int32_t EasyMQServer::transferMsg(const Msg *pMsg)
 
 int32_t EasyMQServer::sendMsgToAgent(const Msg *pMsg, const EasyMQAgent &agent)
 {
-    //INFO("Send msg to agent!");
+    INFO("Send msg to agent!");
 	//return g_tMasterCtrl.SendRsp(agent.ipAddr, agent.port, (char *)pMsg, sizeof(*pMsg));
 }
 

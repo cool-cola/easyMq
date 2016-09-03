@@ -1,6 +1,6 @@
 SODIR = ../so/
-CC=g++ -g -Wall
-LIB= -lpthread -ldl
+CC=g++ -g -Wall -std=c++11
+LIB= -pthread -ldl
 BIN = test_clnt.bin
 
 #DBINC	= -I/usr/include/mysql/ -I/usr/local/mysql/include/
@@ -12,9 +12,13 @@ INC = -I$(PUBLIC) -I$(SODIR)
 INC += $(DBINC)
 LIB += $(DBLIB)
 
-BASEOBJ = 	$(PUBLIC)TSocket.o
+BASEOBJ = 	$(PUBLIC)TSocket.o \
+			../common/easyMsg.o
+
 SOOBJ =
-MYOBJ = 		test_clnt.o
+
+MYOBJ =	test_clnt.o
+
 ##################################
 OBJ = $(BASEOBJ) $(SOOBJ) $(MYOBJ)
 ##################################

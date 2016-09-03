@@ -50,7 +50,7 @@ public:
 	int32_t SendRsp(TMQHeadInfo* pMQHeadInfo, char *pOut, uint32_t iLen);
 protected:
 	int32_t ProcessInitTopic(TMQHeadInfo *pMQHeadInfo, const struct Msg *pstMsg);
-	int32_t ProcessMsg(TMQHeadInfo *pMQHeadInfo, const struct Msg *pstMsg);
+	int32_t ProcessMsg(TMQHeadInfo *pMQHeadInfo, char *, uint32_t);
 
 };
 
