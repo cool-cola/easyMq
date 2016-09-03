@@ -3,6 +3,7 @@
 #include <signal.h>
 #include <execinfo.h>
 #include <sys/file.h>
+#include <sys/resource.h>
 
 int InitDaemon();
 void sigusr1_handle( int iSigVal );
@@ -130,19 +131,14 @@ int InitDaemon()
 {
 	pid_t pid;
 
-	// 1.ת��Ϊ��̨����
 	if ((pid = fork() ) != 0 )
 		exit( 0);
 
-	// 2.�뿪ԭ�ȵĽ�����
 	setsid();
 
-	// 3.��ֹ�ٴδ򿪿����ն�
 	if ((pid = fork() ) != 0 )
 		exit( 0);
 
-	// 4.�رմ򿪵��ļ��������������˷�ϵͳ��Դ
-	/*
 	rlimit rlim;
 	if(getrlimit(RLIMIT_NOFILE,&rlim) == 0)
 	{
@@ -151,17 +147,13 @@ int InitDaemon()
 			close(fd);
 		}
 	}
-	*/
 
-	// 5.�ı䵱ǰ�Ĺ���Ŀ¼������ж�ز����ļ�ϵͳ
 	//if (chdir("/") == -1) exit(1);
 
-	// 6.�����ļ����룬��ֹĳЩ���Ա�����������
 	umask(0);
 	setpgrp();
 
-	// 7.�ض����׼���룬���������������Ϊ�ػ�����û�п����ն�
-	/*
+	int fd;
 	if ((fd = open("/dev/null", O_RDWR)) == -1)
 		exit(1);
 
@@ -169,9 +161,7 @@ int InitDaemon()
 	dup2(fd, STDOUT_FILENO);
 	dup2(fd, STDERR_FILENO);
 	close(fd);
-	*/
 
-	// 8.�����ź�
 	signal( SIGINT,  SIG_IGN);
 	signal( SIGHUP,  SIG_IGN);
 	signal( SIGQUIT, SIG_IGN);
