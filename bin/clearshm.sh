@@ -14,5 +14,5 @@ fi
 
 echo "ipcrm shm  $shmid"
 
-ipcrm shm $shmid
+#ipcrm shm $shmid
 

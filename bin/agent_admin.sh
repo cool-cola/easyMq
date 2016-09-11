@@ -108,7 +108,7 @@ doStop()
 	fi
 
 	########## clear shm #######
-	./clearshm.sh 0
+	#./clearshm.sh 0
 }
 
 doStatus()

@@ -1,97 +1,35 @@
 #!/bin/bash
 #set -x
 
-doStart()
-{
-	echo start
-	FILENAME=`basename $0`
-	MCP="easy_mq_mcp"
-	SCC="easy_mq_scc"
-	CCS="easy_mq_ccs"
-
-	############### config configure file #########
-
-	###############################################################
-	NUM=`ps -fu ${USER} |grep $SCC" ../etc/"$SCC".cfg" |grep -v grep|grep -v ${FILENAME}|wc -l`
-	if [ $NUM -le 0 ]
-	then
-		echo "./$SCC ../etc/$SCC.cfg"
-		./$SCC ../etc/$SCC.cfg
-		./setlog ./$SCC debug
-		#	./send_restart_msg ${SCC}
-	fi
-
-	###############################################################
-	NUM=`ps -fu ${USER} |grep $MCP" ../etc/"$MCP".cfg" |grep -v grep|grep -v ${FILENAME}|wc -l`
-	if [ $NUM -le 0 ]
-	then
-		echo "./$MCP ../etc/${MCP}.cfg"
-		./$MCP ../etc/${MCP}.cfg
-		./setlog ./$MCP debug
-		#	./send_restart_msg ${MCP}
-	fi
-
-	###############################################################
-	NUM=`ps -fu ${USER} |grep $CCS" ../etc/"$CCS".cfg" |grep -v grep|grep -v ${FILENAME}|wc -l`
-	if [ $NUM -le 0 ]
-	then
-		echo "./$CCS ../etc/${CCS}.cfg"
-		./$CCS ../etc/${CCS}.cfg
-		./setlog $CCS debug
-		#	./send_restart_msg ${CCS}
-	fi
-	###############################################################
-}
+PROC="mq_server"
+MCP=$PROC"_mcp"
+SCC=$PROC"_scc"
+CCS=$PROC"_ccs"
 
 doStart()
 {
 	echo start
-	FILENAME=`basename $0`
-	MCP="easy_mq_mcp"
-	SCC="easy_mq_scc"
-	CCS="easy_mq_ccs"
-
-	############### config configure file #########
-
-	###############################################################
-	NUM=`ps -fu ${USER} |grep $SCC" ../etc/"$SCC".cfg" |grep -v grep|grep -v ${FILENAME}|wc -l`
-	if [ $NUM -le 0 ]
-	then
-		echo "./$SCC ../etc/$SCC.cfg"
-		./$SCC ../etc/$SCC.cfg
-		./setlog ./$SCC debug
-		#	./send_restart_msg ${SCC}
-	fi
-
-	###############################################################
-	NUM=`ps -fu ${USER} |grep $MCP" ../etc/"$MCP".cfg" |grep -v grep|grep -v ${FILENAME}|wc -l`
-	if [ $NUM -le 0 ]
-	then
-		echo "./$MCP ../etc/${MCP}.cfg"
-		./$MCP ../etc/${MCP}.cfg
-		./setlog ./$MCP debug
-		#	./send_restart_msg ${MCP}
-	fi
-
-	###############################################################
-	NUM=`ps -fu ${USER} |grep $CCS" ../etc/"$CCS".cfg" |grep -v grep|grep -v ${FILENAME}|wc -l`
-	if [ $NUM -le 0 ]
-	then
-		echo "./$CCS ../etc/${CCS}.cfg"
-		./$CCS ../etc/${CCS}.cfg
-		./setlog $CCS debug
-		#	./send_restart_msg ${CCS}
-	fi
-	###############################################################
+	ALLRPOC="$MCP $SCC $CCS"
+	for BIN in $ALLRPOC
+	do
+		echo $BIN
+		FILENAME=`basename $0`
+		NUM=`ps -fu ${USER} |grep $BIN" ../etc/"$BIN".cfg" |grep -v grep|grep -v ${FILENAME}|wc -l`
+		if [ $NUM -le 0 ]
+		then
+			echo "./$BIN ../etc/$BIN.cfg"
+			./$BIN ../etc/$BIN.cfg
+		fi
+	done
 }
+
+
 doStop()
 {
-	echo stop
-	PROC="easy_mq"
-
 	echo "stoping ${PROC}...!"
 
-	PIDS=`pidof easy_mq_mcp easy_mq_ccs easy_mq_scc`
+	PIDS=`pidof $MCP $CCS $SCC`
+	echo $PIDS
 
 	KILL=0
 	for PID in $PIDS
@@ -108,15 +46,13 @@ doStop()
 	fi
 
 	########## clear shm #######
-	./clearshm.sh 0
+	#./clearshm.sh 0
 }
 
 doStatus()
 {
-	echo status
-	PROC="easy_mq"
 
-	ps -ef | grep ${PROC} | grep -v grep
+	ps -ef | grep -E "$MCP|$CCS|$SCC" | grep -v grep
 }
 
 opt=$1
