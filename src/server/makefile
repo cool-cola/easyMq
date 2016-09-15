@@ -2,7 +2,7 @@ OPT = -g -Wall -Wno-deprecated -Wno-non-template-friend -std=c++11
 CXX = g++ $(OPT)
 CC= gcc $(OPT)
 
-BIN = mq_server_mcp
+BIN = mq_server_mcp.bin
 INC = -I./ -I../../common
 LIB = -lpthread -ldl
 

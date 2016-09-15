@@ -4,7 +4,7 @@ INC = -I./ -I../../public/
 #CC=g++ -g -Wall -O2 -fPIC -D_BUFFMNG_APPEND_SKIP
 CC=g++ -g -Wall -O0 -fPIC -D_BUFFMNG_APPEND_SKIP
 LIB = -ldl -lpthread
-BIN = scc
+BIN = scc.bin
 
 ##################################
 PUBLIC = ../../public/

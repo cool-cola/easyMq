@@ -4,8 +4,8 @@ INC = -I./ -I../../public/
 # -D_MUTI_THREAD
 
 CC=g++ -g -Wall -O0 -fPIC -D_BUFFMNG_APPEND_SKIP
-LIB = -ldl -lpthread 
-BIN = ccs 
+LIB = -ldl -lpthread
+BIN = ccs.bin
 ##################################
 PUBLIC = ../../public/
 
@@ -22,7 +22,7 @@ $(PUBLIC)thread.o \
 $(PUBLIC)CodeQueue.o \
 $(PUBLIC)CodeQueueMutil.o \
 $(PUBLIC)HashFunc.o \
-$(PUBLIC)Statistic.o 
+$(PUBLIC)Statistic.o
 
 all: $(BIN) $(SO)
 
@@ -40,4 +40,4 @@ clean:
 
 cleanall:
 	rm -f *.o ${BIN}  ${OBJ}
-	
+

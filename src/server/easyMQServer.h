@@ -40,6 +40,7 @@ namespace EasyMQ
         protected:
             int32_t sendMsgToAgent(const Msg *pMsg, const EasyMQAgent &agent);
 
+			void TimeTick(timeval *t);
     };
 
     //extern EasyMQServer g_easyMQServer;

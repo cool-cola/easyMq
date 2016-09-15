@@ -5,7 +5,7 @@ PROC="mq_server"
 SUFFIX=".bin"
 MCP=$PROC"_mcp"$SUFFIX
 SCC=$PROC"_scc"$SUFFIX
-CCS=$PROC"_ccs"$SUFFIX
+CCS=$PROC"_ccs"
 
 doStart()
 {
@@ -14,13 +14,12 @@ doStart()
 	for BIN in $ALLRPOC
 	do
 		echo $BIN
-		BIN_NAME=`basename -s $SUFFIX $BIN`
-		SCRIPT_NAME=`basename $0`
-		NUM=`ps -fu ${USER} |grep $BIN" ../etc/"$BIN_NAME".cfg" |grep -v grep|grep -v $SCRIPT_NAME|wc -l`
+		FILENAME=`basename $0`
+		NUM=`ps -fu ${USER} |grep $BIN" ../etc/"$BIN".cfg" |grep -v grep|grep -v ${FILENAME}|wc -l`
 		if [ $NUM -le 0 ]
 		then
-			echo "./$BIN ../etc/$BIN_NAME.cfg"
-			./$BIN ../etc/$BIN_NAME.cfg
+			echo "./$BIN ../etc/$BIN.cfg"
+			./$BIN ../etc/$BIN.cfg
 		fi
 	done
 }
