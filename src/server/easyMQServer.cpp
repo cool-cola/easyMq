@@ -23,7 +23,7 @@ void EasyMQServer::TimeTick(timeval *t)
 }
 int32_t EasyMQServer::initTopic(const string &topic, const EasyMQAgent &agent)
 {
-	INFO("receive msg %s from ip %d port %d socketSuffix %d",topic.c_str(),agent.ipAddr,agent.port,agent.socketSuffix);
+	INFO("receive msg %s from ip %d port %d socketSuffix %d, szEchoData %d",topic.c_str(),agent.ipAddr,agent.port,agent.socketSuffix,*(int *)agent.szEchoData);
     std::set<EasyMQAgent> setAgent;
     auto it = g_mapTopicToAgent.find(topic);
     if(it == g_mapTopicToAgent.end())

@@ -31,13 +31,13 @@ Description: 基础函数库
 #include <dlfcn.h>
 //#include <endian.h>
 
-#if defined(LINUX) 
-#include <linux/ip.h> 
-#include <linux/tcp.h> 
-#else 
-#include <netinet/ip.h> 
-#include <netinet/tcp.h> 
-#endif 
+#if defined(LINUX)
+#include <linux/ip.h>
+#include <linux/tcp.h>
+#else
+#include <netinet/ip.h>
+#include <netinet/tcp.h>
+#endif
 
 #include <vector>
 #include <string>
@@ -122,7 +122,39 @@ inline string trim_right(const string &s,const string& filt=" ")
 	return string(head,0,p+1-head);
 }
 
+inline void GetBaseName(string &fileName,string &baseName)
+{
+	int pos = fileName.find_last_of(".");
+	baseName = fileName.substr(0,pos);
+}
 
+
+inline void GetBaseName(char *pathName,char *baseName)
+{
+    int end = strlen(pathName);
+    int beg = 0;
+    int pos = end-1;
+    while(pos >= 0)
+    {
+        if(pathName[pos] == '.')
+        {
+            end = pos;
+        }
+        else if(pathName[pos] == '/')
+        {
+            beg = pos+1;
+            break;
+        }
+        else if(pos == 0)
+        {
+            beg = pos;
+            break;
+        }
+        pos--;
+    }
+    strncpy(baseName,pathName+beg,end-beg);
+    printf("begin is %d,end is %d,baseName is %s\n",beg,end,baseName);
+}
 /*
 	负载检查器,CLoadGrid(100000,50,99999) 即
 	在时间轴上以50ms为每次前进的跨度,在100s的
@@ -152,7 +184,7 @@ public:
 	void CloseLock(){m_bLock = false;};
 private:
 	void UpdateLoad(timeval *ptCurrTime=NULL);
-	
+
 	int m_iTimeAllSpanMs;
 	int m_iEachGridSpanMs;
 	int m_iMaxNumInAllSpan;

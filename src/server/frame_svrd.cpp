@@ -63,7 +63,7 @@ int main( int argc, char **argv )
 
 	char szTmp[128];
 	char szProcName[128];
-	GetNameFromPath(argv[0],szProcName);
+	GetBaseName(argv[0],szProcName);
 
 	sprintf(szTmp,"../log/%s",szProcName);
 	TLib_Log_LogInit(szTmp, 0x10000000, 5);

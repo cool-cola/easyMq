@@ -1,1 +1,5 @@
+*.[oa]
+*.bin
+test.txt
+*.swp
 core*

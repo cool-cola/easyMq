@@ -69,6 +69,7 @@ int32_t CMasterCtrl::ProcessInitTopic(TMQHeadInfo *pMQHeadInfo, const struct Msg
     agent.ipAddr = pMQHeadInfo->m_unClientIP;
     agent.port = pMQHeadInfo->m_usClientPort;
 	agent.socketSuffix = pMQHeadInfo->m_iSuffix;
+	memcpy(agent.szEchoData,pMQHeadInfo->m_szEchoData,12);
 	std::string topic(pstMsg->cBuf,pstMsg->uBufLen);
     g_easyMQServer.initTopic(topic,agent);
 
@@ -105,8 +106,9 @@ int32_t CMasterCtrl::ProcessMsg(TMQHeadInfo *pMQHeadInfo, char *pUsrCode, uint32
 			INFO("equal");
 			for(auto &q : p.second)
 			{
-				INFO("发送msg到 socketSuffix %d",q.socketSuffix);
+				INFO("发送msg到 socketSuffix %d,szEchoData %x",q.socketSuffix,(int *)q.szEchoData);
 				pMQHeadInfo->m_iSuffix = q.socketSuffix;
+				memcpy(pMQHeadInfo->m_szEchoData,q.szEchoData,12);
 				SendRsp(pMQHeadInfo,(char *)pUsrCode,iUsrCodeLen);
 			}
 		}

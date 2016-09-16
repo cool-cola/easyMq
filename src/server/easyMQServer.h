@@ -16,6 +16,7 @@ namespace EasyMQ
         uint32_t ipAddr;
         uint32_t port;
 		int32_t socketSuffix;
+		char szEchoData[12]; //ccs用来定位
 		//set必须要重载这个操作符
 		bool operator<(const EasyMQAgent &agent)const
 		{
